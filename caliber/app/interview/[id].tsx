@@ -730,8 +730,17 @@ export default function InterviewDetail() {
     <>
       <Stack.Screen
         options={{
-          title: interview.name,
           headerLargeTitle: false,
+          headerTitle: () => (
+            <View style={{ alignItems: "center", gap: 1 }}>
+              <Text style={{ fontSize: 17, fontWeight: "600", color: "#1A1A1A" }}>
+                {interview.name}
+              </Text>
+              <Text style={{ fontSize: 12, color: "#8E8E8E" }}>
+                {interview.role}
+              </Text>
+            </View>
+          ),
         }}
       />
 
