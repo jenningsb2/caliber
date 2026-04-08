@@ -144,7 +144,7 @@ export default function SettingsScreen() {
 
         {/* Account */}
         <Section title="Account">
-          <SettingsRow icon="person-outline" label="Profile" />
+          <SettingsRow icon="person-outline" label="Profile" onPress={() => router.push("/profile")} />
           <Separator />
           <SettingsRow icon="lock-closed-outline" label="Privacy" />
           <Separator />

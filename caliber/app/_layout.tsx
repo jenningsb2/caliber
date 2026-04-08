@@ -18,6 +18,7 @@ export default function RootLayout() {
       <Stack.Screen name="positions/[role]" />
       <Stack.Screen name="positions/new" options={{ presentation: "modal" }} />
       <Stack.Screen name="dialer" options={{ presentation: "modal" }} />
+      <Stack.Screen name="profile" options={{ presentation: "modal" }} />
     </Stack>
   );
 }
