@@ -19,6 +19,7 @@ export default function RootLayout() {
       <Stack.Screen name="positions/new" options={{ presentation: "modal" }} />
       <Stack.Screen name="dialer" options={{ presentation: "modal" }} />
       <Stack.Screen name="profile" options={{ presentation: "modal" }} />
+      <Stack.Screen name="interview/edit" options={{ presentation: "modal" }} />
     </Stack>
   );
 }

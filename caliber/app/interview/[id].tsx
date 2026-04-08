@@ -10,7 +10,7 @@ import {
 import * as Clipboard from "expo-clipboard";
 import { GlassView } from "expo-glass-effect";
 import { Image } from "expo-image";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActionSheetIOS, Alert, Animated, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -673,6 +673,7 @@ export default function InterviewDetail() {
     status: InterviewStatus;
   }>();
 
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const interview = INTERVIEW_MAP[id];
   const [status, setStatus] = useState<InterviewStatus>(statusParam ?? "upcoming");
@@ -749,7 +750,7 @@ export default function InterviewDetail() {
           <Stack.Toolbar.MenuAction icon="square.and.arrow.up" onPress={() => Alert.alert("Share summary", "Coming soon")}>
             Share summary
           </Stack.Toolbar.MenuAction>
-          <Stack.Toolbar.MenuAction icon="pencil" onPress={() => Alert.alert("Edit candidate", "Coming soon")}>
+          <Stack.Toolbar.MenuAction icon="pencil" onPress={() => router.push(`/interview/edit?id=${id}`)}>
             Edit candidate
           </Stack.Toolbar.MenuAction>
           <Stack.Toolbar.MenuAction
