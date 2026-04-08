@@ -292,7 +292,7 @@ export default function InterviewsScreen() {
           gap: 10,
         }}
       >
-        <TouchableOpacity activeOpacity={0.8}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => router.push("/dialer")}>
           <GlassView
             colorScheme="dark"
             style={{
