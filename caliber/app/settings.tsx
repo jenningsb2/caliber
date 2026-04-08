@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Stack, useRouter } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import potbellyLogo from "../assets/images/Potbelly_Sandwich_Shop_logo.png";
 
@@ -60,6 +61,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [autoSummary, setAutoSummary] = useState(true);
 
   return (
     <>
@@ -127,7 +129,15 @@ export default function SettingsScreen() {
 
         {/* AI */}
         <Section title="AI & Summaries">
-          <SettingsRow icon="sparkles-outline" label="Auto-generate summary" value="On" />
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10, paddingHorizontal: 16 }}>
+            <Ionicons name="sparkles-outline" size={20} color="#1A1A1A" />
+            <Text style={{ flex: 1, fontSize: 16, color: "#1A1A1A" }}>Auto-generate summary</Text>
+            <Switch
+              value={autoSummary}
+              onValueChange={setAutoSummary}
+              trackColor={{ true: "#2A6B3C" }}
+            />
+          </View>
           <Separator />
           <SettingsRow icon="language-outline" label="Transcription language" value="English" />
         </Section>
