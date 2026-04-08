@@ -472,7 +472,7 @@ function AudioPlayer({ uri }: { uri: string }) {
               <View
                 style={{
                   position: "absolute",
-                  left: barWidth * progress - 5,
+                  left: Math.max(0, barWidth * progress - 5),
                   width: 10,
                   height: 10,
                   borderRadius: 5,
