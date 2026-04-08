@@ -3,7 +3,7 @@ import { Image } from "expo-image";
 import { GlassView } from "expo-glass-effect";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActionSheetIOS, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import potbellyLogo from "../assets/images/Potbelly_Sandwich_Shop_logo.png";
 import { IONICON, SECTIONS, UPCOMING, type CandidateStatus, type Interview, type InterviewType } from "../constants/mock-data";
@@ -193,17 +193,33 @@ export default function InterviewsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [positionFilter, setPositionFilter] = useState<string | null>(null);
   const bottomBarHeight = 52 + insets.bottom + 24;
 
+  const allRoles = Array.from(
+    new Set([...UPCOMING, ...SECTIONS.flatMap((s) => s.data)].map((i) => i.role))
+  ).sort();
+
+  function handlePositionFilter() {
+    const options = [...allRoles, "Clear filter", "Cancel"];
+    ActionSheetIOS.showActionSheetWithOptions(
+      { title: "Filter by Position", options, cancelButtonIndex: options.length - 1, destructiveButtonIndex: options.length - 2, tintColor: "#1A1A1A" },
+      (i) => {
+        if (i < allRoles.length) setPositionFilter(allRoles[i]);
+        else if (i === allRoles.length) setPositionFilter(null);
+      }
+    );
+  }
+
   const q = query.toLowerCase();
-  const filteredUpcoming = UPCOMING.filter(
-    (i) => i.name.toLowerCase().includes(q) || i.role.toLowerCase().includes(q)
-  );
+  const matchesFilters = (i: Interview) =>
+    (i.name.toLowerCase().includes(q) || i.role.toLowerCase().includes(q)) &&
+    (positionFilter === null || i.role === positionFilter);
+
+  const filteredUpcoming = UPCOMING.filter(matchesFilters);
   const filteredSections = SECTIONS.map((s) => ({
     ...s,
-    data: s.data.filter(
-      (i) => i.name.toLowerCase().includes(q) || i.role.toLowerCase().includes(q)
-    ),
+    data: s.data.filter(matchesFilters),
   })).filter((s) => s.data.length > 0);
 
   return (
@@ -223,8 +239,8 @@ export default function InterviewsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Search bar */}
-        <View style={{ backgroundColor: "#fff", paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: "#F0F0F0", borderRadius: 12, borderCurve: "continuous", paddingHorizontal: 12, gap: 8, height: 40 }}>
+        <View style={{ backgroundColor: "#fff", paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8, flexDirection: "row", gap: 8, alignItems: "center" }}>
+          <View style={{ flex: 1, flexDirection: "row", alignItems: "center", backgroundColor: "#F0F0F0", borderRadius: 12, borderCurve: "continuous", paddingHorizontal: 12, gap: 8, height: 40 }}>
             <Ionicons name="search-outline" size={16} color="#8E8E8E" />
             <TextInput
               placeholder="Search interviews"
@@ -236,6 +252,25 @@ export default function InterviewsScreen() {
               style={{ flex: 1, fontSize: 15, color: "#1A1A1A" }}
             />
           </View>
+          <TouchableOpacity
+            onPress={handlePositionFilter}
+            activeOpacity={0.7}
+            style={{
+              height: 40,
+              paddingHorizontal: 12,
+              borderRadius: 12,
+              borderCurve: "continuous",
+              backgroundColor: positionFilter ? "#2A6B3C" : "#F0F0F0",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
+            <Ionicons name="filter" size={14} color={positionFilter ? "#fff" : "#8E8E8E"} />
+            <Text style={{ fontSize: 14, fontWeight: "500", color: positionFilter ? "#fff" : "#8E8E8E" }} numberOfLines={1}>
+              {positionFilter ?? "Filter"}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Coming up — white band */}
