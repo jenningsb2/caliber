@@ -296,7 +296,7 @@ export default function InterviewsScreen() {
           <GlassView
             colorScheme="dark"
             style={{
-              backgroundColor: "rgba(0,0,0,0.75)",
+              backgroundColor: "#2A6B3C",
               borderRadius: 100,
               width: 52,
               height: 52,
