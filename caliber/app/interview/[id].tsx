@@ -430,7 +430,9 @@ function AudioPlayer({ uri }: { uri: string }) {
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
-        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+        borderWidth: 1,
+        borderColor: "rgba(0,0,0,0.07)",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
       }}
     >
       <TouchableOpacity
