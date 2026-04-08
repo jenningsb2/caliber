@@ -770,6 +770,12 @@ export default function InterviewDetail() {
       >
         {/* Pill badges */}
         <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
+          <Pill bg="#1A1A1A" color="#fff">
+            <Ionicons name="calendar-outline" size={13} color="#fff" />
+            <Text style={{ color: "#fff", fontWeight: "500", fontSize: 13 }}>
+              {interview.date} • {interview.time}
+            </Text>
+          </Pill>
           {interview.score && (
             <Pill bg="#2A6B3C" color="#fff">
               <Ionicons name="checkmark-circle" size={14} color="#fff" />
@@ -778,12 +784,6 @@ export default function InterviewDetail() {
               </Text>
             </Pill>
           )}
-          <Pill bg="#1A1A1A" color="#fff">
-            <Ionicons name="calendar-outline" size={13} color="#fff" />
-            <Text style={{ color: "#fff", fontWeight: "500", fontSize: 13 }}>
-              {interview.date} • {interview.time}
-            </Text>
-          </Pill>
           <TouchableOpacity onPress={showStatusPicker} activeOpacity={0.7}>
             <Pill bg={statusStyle.bg} color={statusStyle.color}>
               <Text style={{ color: statusStyle.color, fontWeight: "600", fontSize: 13 }}>
