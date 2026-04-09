@@ -47,6 +47,22 @@ const STATUS_STYLE: Record<CandidateStatus, { bg: string; color: string }> = {
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
+function ScoringPill() {
+  const [dots, setDots] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => setDots((d) => (d + 1) % 4), 400);
+    return () => clearInterval(interval);
+  }, []);
+  return (
+    <View style={{ backgroundColor: "#8E8E8E", borderRadius: 20, borderCurve: "continuous", paddingHorizontal: 12, paddingVertical: 6, flexDirection: "row", alignItems: "center", gap: 5 }}>
+      <Ionicons name="hourglass-outline" size={13} color="#fff" />
+      <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>
+        Scoring{".".repeat(dots)}
+      </Text>
+    </View>
+  );
+}
+
 function Pill({
   children,
   bg,
@@ -1089,14 +1105,6 @@ export default function InterviewDetail() {
               {interview?.date ?? "Today"} {"\u2022"} {interview?.time ?? new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
             </Text>
           </Pill>
-          {interview?.score && (
-            <Pill bg="#2A6B3C" color="#fff">
-              <Ionicons name="checkmark-circle" size={14} color="#fff" />
-              <Text style={{ color: "#fff", fontWeight: "600", fontSize: 14 }}>
-                {interview.score.value}/{interview.score.outOf}
-              </Text>
-            </Pill>
-          )}
           <TouchableOpacity onPress={showStatusPicker} activeOpacity={0.7}>
             <Pill bg={statusStyle.bg} color={statusStyle.color}>
               <Text style={{ color: statusStyle.color, fontWeight: "600", fontSize: 13 }}>
@@ -1105,6 +1113,23 @@ export default function InterviewDetail() {
               <Ionicons name="chevron-down" size={12} color={statusStyle.color} />
             </Pill>
           </TouchableOpacity>
+          {interview?.score ? (
+            <Pill bg="#2A6B3C" color="#fff">
+              <Ionicons name="checkmark-circle" size={14} color="#fff" />
+              <Text style={{ color: "#fff", fontWeight: "600", fontSize: 14 }}>
+                {interview.score.value}/{interview.score.outOf}
+              </Text>
+            </Pill>
+          ) : draftScores ? (
+            <Pill bg="#2A6B3C" color="#fff">
+              <Ionicons name="checkmark-circle" size={14} color="#fff" />
+              <Text style={{ color: "#fff", fontWeight: "600", fontSize: 14 }}>
+                {draftScores.reduce((s, c) => s + c.score, 0)}/{draftScores.length * 5}
+              </Text>
+            </Pill>
+          ) : summaryLoading ? (
+            <ScoringPill />
+          ) : null}
         </View>
 
         {/* Tab bar */}
@@ -1258,29 +1283,29 @@ export default function InterviewDetail() {
                 setRecordingUri(uri);
                 setStatus("past");
                 if (!interview?.criterionScores) {
-                  const template = roleTemplates.find((t) => t.role === editRole);
-                  if (template) {
-                    setDraftScores(template.criteria.map((c) => ({
-                      criterionId: c.id,
-                      score: Math.floor(Math.random() * 2) + 3,
-                      note: "Demonstrated solid competency in this area with specific examples.",
-                    })));
-                  }
-                  setDraftFeedback({
-                    overallImpression: `${editName || "The candidate"} came across as a strong fit for the ${editRole} position. Gave clear, structured answers and showed genuine enthusiasm for the role.`,
-                    whatWentWell: [
-                      "Gave specific, relevant examples without excessive prompting.",
-                      "Demonstrated genuine interest in the role and the brand.",
-                      "Communicated clearly and maintained good energy throughout.",
-                    ],
-                    areasToImprove: [
-                      "Could have probed deeper on availability constraints \u2014 left some scheduling questions unresolved.",
-                      "Consider asking for a specific conflict resolution example earlier in the conversation.",
-                    ],
-                    suggestedFollowUp: "Schedule a brief follow-up to clarify availability and confirm any outstanding documentation before extending an offer.",
-                  });
                   setSummaryLoading(true);
                   setTimeout(() => {
+                    const tmpl = roleTemplates.find((t) => t.role === editRole);
+                    if (tmpl) {
+                      setDraftScores(tmpl.criteria.map((c) => ({
+                        criterionId: c.id,
+                        score: Math.floor(Math.random() * 2) + 3,
+                        note: "Demonstrated solid competency in this area with specific examples.",
+                      })));
+                    }
+                    setDraftFeedback({
+                      overallImpression: `${editName || "The candidate"} came across as a strong fit for the ${editRole} position. Gave clear, structured answers and showed genuine enthusiasm for the role.`,
+                      whatWentWell: [
+                        "Gave specific, relevant examples without excessive prompting.",
+                        "Demonstrated genuine interest in the role and the brand.",
+                        "Communicated clearly and maintained good energy throughout.",
+                      ],
+                      areasToImprove: [
+                        "Could have probed deeper on availability constraints \u2014 left some scheduling questions unresolved.",
+                        "Consider asking for a specific conflict resolution example earlier in the conversation.",
+                      ],
+                      suggestedFollowUp: "Schedule a brief follow-up to clarify availability and confirm any outstanding documentation before extending an offer.",
+                    });
                     setDraftSummary({
                       experienceSnapshot: `${editName || "The candidate"} has relevant experience for the ${editRole} position. Demonstrated familiarity with the day-to-day responsibilities and showed they can hit the ground running.`,
                       keyHighlights: [
