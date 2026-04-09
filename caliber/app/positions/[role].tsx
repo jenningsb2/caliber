@@ -3,7 +3,8 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ROLE_TEMPLATES, type ScoringCriterion } from "../../constants/mock-data";
+import { getBrandRoleTemplates, type ScoringCriterion } from "../../constants/mock-data";
+import { useBrand } from "../../contexts/brand-context";
 
 function CriterionRow({
   criterion,
@@ -99,9 +100,10 @@ export default function PositionDetailScreen() {
   const { role: roleParam, generated: generatedParam } = useLocalSearchParams<{ role: string; generated?: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { brand } = useBrand();
 
   const decoded = decodeURIComponent(roleParam ?? "");
-  const template = ROLE_TEMPLATES.find((t) => t.role === decoded);
+  const template = getBrandRoleTemplates(brand).find((t) => t.role === decoded);
 
   const generatedData = generatedParam ? JSON.parse(generatedParam) : null;
 

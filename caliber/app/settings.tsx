@@ -5,6 +5,9 @@ import { useState } from "react";
 import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import potbellyLogo from "../assets/images/Potbelly_Sandwich_Shop_logo.png";
+import tacoBellLogo from "../assets/images/taco_bell_logo.png";
+import { BRAND_META } from "../constants/mock-data";
+import { useBrand, useToggleBrand } from "../contexts/brand-context";
 
 type SettingsRowProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -19,24 +22,12 @@ function SettingsRow({ icon, label, value, onPress, destructive }: SettingsRowPr
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.7}
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-        paddingVertical: 13,
-        paddingHorizontal: 16,
-      }}
+      style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 13, paddingHorizontal: 16 }}
     >
       <Ionicons name={icon} size={20} color={destructive ? "#FF3B30" : "#1A1A1A"} />
-      <Text style={{ flex: 1, fontSize: 16, color: destructive ? "#FF3B30" : "#1A1A1A" }}>
-        {label}
-      </Text>
-      {value && (
-        <Text style={{ fontSize: 15, color: "#8E8E8E" }}>{value}</Text>
-      )}
-      {!destructive && (
-        <Ionicons name="chevron-forward" size={16} color="#C0C0C0" />
-      )}
+      <Text style={{ flex: 1, fontSize: 16, color: destructive ? "#FF3B30" : "#1A1A1A" }}>{label}</Text>
+      {value && <Text style={{ fontSize: 15, color: "#8E8E8E" }}>{value}</Text>}
+      {!destructive && <Ionicons name="chevron-forward" size={16} color="#C0C0C0" />}
     </TouchableOpacity>
   );
 }
@@ -62,17 +53,13 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [autoSummary, setAutoSummary] = useState(true);
+  const { brand } = useBrand();
+  const toggleBrand = useToggleBrand();
+  const meta = BRAND_META[brand];
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: "Settings",
-          headerLargeTitle: false,
-          presentation: "modal",
-        }}
-      />
-
+      <Stack.Screen options={{ title: "Settings", headerLargeTitle: false, presentation: "modal" }} />
       <Stack.Toolbar placement="left">
         <Stack.Toolbar.Button onPress={() => router.back()}>Done</Stack.Toolbar.Button>
       </Stack.Toolbar>
@@ -83,7 +70,7 @@ export default function SettingsScreen() {
         contentContainerStyle={{ padding: 16, gap: 24, paddingBottom: insets.bottom + 32 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Profile */}
+        {/* Profile card */}
         <View
           style={{
             backgroundColor: "#fff",
@@ -109,15 +96,22 @@ export default function SettingsScreen() {
               overflow: "hidden",
             }}
           >
-            <Image source={potbellyLogo} style={{ width: 44, height: 44 }} contentFit="contain" />
+            <Image
+              source={brand === "potbelly" ? potbellyLogo : tacoBellLogo}
+              style={{ width: 44, height: 44 }}
+              contentFit="contain"
+            />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 17, fontWeight: "600", color: "#1A1A1A" }}>Potbelly Sandwich Shop</Text>
-            <Text style={{ fontSize: 14, color: "#8E8E8E" }}>manager@potbelly.com</Text>
+            <Text style={{ fontSize: 17, fontWeight: "600", color: "#1A1A1A" }}>{meta.name}</Text>
+            <Text style={{ fontSize: 14, color: "#8E8E8E" }}>{meta.email}</Text>
           </View>
+          <TouchableOpacity onPress={toggleBrand} activeOpacity={0.6} style={{ padding: 6 }}>
+            <Ionicons name="swap-horizontal-outline" size={20} color="#C0C0C0" />
+          </TouchableOpacity>
         </View>
 
-        {/* Positions */}
+        {/* Organization */}
         <Section title="Organization">
           <SettingsRow icon="briefcase-outline" label="Positions" onPress={() => router.push("/positions")} />
         </Section>
@@ -132,11 +126,7 @@ export default function SettingsScreen() {
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10, paddingHorizontal: 16 }}>
             <Ionicons name="sparkles-outline" size={20} color="#1A1A1A" />
             <Text style={{ flex: 1, fontSize: 16, color: "#1A1A1A" }}>Auto-generate summary</Text>
-            <Switch
-              value={autoSummary}
-              onValueChange={setAutoSummary}
-              trackColor={{ true: "#2A6B3C" }}
-            />
+            <Switch value={autoSummary} onValueChange={setAutoSummary} trackColor={{ true: "#2A6B3C" }} />
           </View>
           <Separator />
           <SettingsRow icon="language-outline" label="Transcription language" value="English" />

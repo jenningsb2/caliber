@@ -3,11 +3,14 @@ import { Stack, useRouter } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ROLE_TEMPLATES } from "../../constants/mock-data";
+import { getBrandRoleTemplates } from "../../constants/mock-data";
+import { useBrand } from "../../contexts/brand-context";
 
 export default function PositionsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { brand } = useBrand();
+  const roleTemplates = getBrandRoleTemplates(brand);
 
   return (
     <>
@@ -35,7 +38,7 @@ export default function PositionsScreen() {
           Define the roles your org hires for and the criteria used to evaluate candidates during interviews.
         </Text>
 
-        {ROLE_TEMPLATES.map((template) => (
+        {roleTemplates.map((template) => (
           <TouchableOpacity
             key={template.role}
             activeOpacity={0.92}

@@ -1,9 +1,11 @@
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { BrandProvider } from "../contexts/brand-context";
 
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+    <BrandProvider>
       <Stack
         screenOptions={{
           headerLargeTitle: true,
@@ -23,6 +25,7 @@ export default function RootLayout() {
         <Stack.Screen name="profile" options={{ presentation: "modal" }} />
         <Stack.Screen name="interview/edit" options={{ presentation: "modal" }} />
       </Stack>
+    </BrandProvider>
     </GestureHandlerRootView>
   );
 }

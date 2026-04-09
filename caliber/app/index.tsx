@@ -6,7 +6,9 @@ import { useState } from "react";
 import { ActionSheetIOS, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import potbellyLogo from "../assets/images/Potbelly_Sandwich_Shop_logo.png";
-import { IONICON, SECTIONS, UPCOMING, type CandidateStatus, type Interview, type InterviewType } from "../constants/mock-data";
+import tacoBellLogo from "../assets/images/taco_bell_logo.png";
+import { IONICON, getBrandSections, getBrandUpcoming, type CandidateStatus, type Interview, type InterviewType } from "../constants/mock-data";
+import { useBrand } from "../contexts/brand-context";
 
 const STATUS_STYLE: Record<CandidateStatus, { bg: string; color: string }> = {
   Applied:     { bg: "#E0E0E0", color: "#555" },
@@ -20,10 +22,15 @@ const STATUS_STYLE: Record<CandidateStatus, { bg: string; color: string }> = {
 
 function HeaderRight() {
   const router = useRouter();
+  const { brand } = useBrand();
   return (
     <TouchableOpacity activeOpacity={0.7} onPress={() => router.push("/settings")}>
       <View style={styles.avatarButton}>
-        <Image source={potbellyLogo} style={styles.avatarImage} contentFit="contain" />
+        <Image
+          source={brand === "potbelly" ? potbellyLogo : tacoBellLogo}
+          style={styles.avatarImage}
+          contentFit="contain"
+        />
       </View>
     </TouchableOpacity>
   );
@@ -107,12 +114,16 @@ function InterviewCard({ interview, onPress }: { interview: Interview; onPress: 
 export default function InterviewsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { brand } = useBrand();
   const [query, setQuery] = useState("");
   const [positionFilter, setPositionFilter] = useState<string | null>(null);
   const bottomBarHeight = 52 + insets.bottom + 24;
 
+  const upcoming = getBrandUpcoming(brand);
+  const sections = getBrandSections(brand);
+
   const allRoles = Array.from(
-    new Set([...UPCOMING, ...SECTIONS.flatMap((s) => s.data)].map((i) => i.role))
+    new Set([...upcoming, ...sections.flatMap((s) => s.data)].map((i) => i.role))
   ).sort();
 
   function handlePositionFilter() {
@@ -131,8 +142,8 @@ export default function InterviewsScreen() {
     (i.name.toLowerCase().includes(q) || i.role.toLowerCase().includes(q)) &&
     (positionFilter === null || i.role === positionFilter);
 
-  const filteredUpcoming = UPCOMING.filter(matchesFilters);
-  const filteredSections = SECTIONS.map((s) => ({
+  const filteredUpcoming = upcoming.filter(matchesFilters);
+  const filteredSections = sections.map((s) => ({
     ...s,
     data: s.data.filter(matchesFilters),
   })).filter((s) => s.data.length > 0);

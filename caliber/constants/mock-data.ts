@@ -612,3 +612,26 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
 export const INTERVIEW_MAP: Record<string, Interview> = Object.fromEntries(
   [...UPCOMING, ...SECTIONS.flatMap((s) => s.data)].map((i) => [i.id, i])
 );
+
+// ─── Brand switching ──────────────────────────────────────────────────────────
+
+export type Brand = "potbelly" | "tacobell";
+
+export const BRAND_META: Record<Brand, { name: string; email: string }> = {
+  potbelly: { name: "Potbelly Sandwich Shop", email: "manager@potbelly.com" },
+  tacobell: { name: "Taco Bell", email: "manager@tacobell.com" },
+};
+
+function applyBrand<T>(data: T, brand: Brand): T {
+  if (brand === "potbelly") return data;
+  return JSON.parse(
+    JSON.stringify(data)
+      .replace(/Sandwich Associate/g, "Team Member")
+      .replace(/Potbelly/g, "Taco Bell")
+  );
+}
+
+export function getBrandUpcoming(brand: Brand) { return applyBrand(UPCOMING, brand); }
+export function getBrandSections(brand: Brand) { return applyBrand(SECTIONS, brand); }
+export function getBrandInterviewMap(brand: Brand) { return applyBrand(INTERVIEW_MAP, brand); }
+export function getBrandRoleTemplates(brand: Brand) { return applyBrand(ROLE_TEMPLATES, brand); }

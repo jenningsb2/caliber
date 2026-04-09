@@ -11,6 +11,7 @@ import * as Clipboard from "expo-clipboard";
 import { GlassView } from "expo-glass-effect";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useBrand } from "../../contexts/brand-context";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ActionSheetIOS, Alert, Animated, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -18,9 +19,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import potbellyLogo from "../../assets/images/Potbelly_Sandwich_Shop_logo.png";
 import { AnimatedWaveform } from "../../components/animated-waveform";
 import {
-  INTERVIEW_MAP,
+  getBrandInterviewMap,
+  getBrandRoleTemplates,
   InterviewStatus,
-  ROLE_TEMPLATES,
   type AISummary,
   type CandidateStatus,
   type CriterionScore,
@@ -192,7 +193,8 @@ function NumberedList({ items }: { items: string[] }) {
 }
 
 function CoachingCard({ interview, interviewStatus }: { interview: import("../../constants/mock-data").Interview; interviewStatus: InterviewStatus }) {
-  const template = ROLE_TEMPLATES.find((t) => t.role === interview.role);
+  const { brand } = useBrand();
+  const template = getBrandRoleTemplates(brand).find((t) => t.role === interview.role);
 
   if (!template) {
     return <PlaceholderCard label="No coaching template for this role" />;
@@ -706,7 +708,8 @@ export default function InterviewDetail() {
 
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const interview = INTERVIEW_MAP[id];
+  const { brand } = useBrand();
+  const interview = getBrandInterviewMap(brand)[id];
   const [status, setStatus] = useState<InterviewStatus>(statusParam ?? "upcoming");
   const [activeTab, setActiveTab] = useState<Tab>("Summary");
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
