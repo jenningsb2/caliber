@@ -722,47 +722,29 @@ function AudioPlayer({ uri, speed, onSpeedPress }: { uri: string; speed: number;
   );
 }
 
-function PastBar({ onChat, onResume, recordingUri, speed, onSpeedPress }: { onChat: () => void; onResume: () => void; recordingUri: string | null; speed: number; onSpeedPress: () => void }) {
+function PastBar({ onChat, recordingUri, speed, onSpeedPress }: { onChat: () => void; recordingUri: string | null; speed: number; onSpeedPress: () => void }) {
   return (
     <View style={{ gap: 10 }}>
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8} onPress={onChat}>
-          <GlassView
-            colorScheme="dark"
-            style={{
-              backgroundColor: "#2A6B3C",
-              borderRadius: 100,
-              height: 52,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              overflow: "hidden",
-            }}
-          >
-            <Ionicons name="sparkles" size={18} color="#fff" />
-            <Text style={{ color: "#fff", fontSize: 15, fontWeight: "600" }}>
-              Chat with Caliber
-            </Text>
-          </GlassView>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={onResume} activeOpacity={0.8}>
-          <GlassView
-            colorScheme="dark"
-            style={{
-              backgroundColor: "rgba(0,0,0,0.75)",
-              borderRadius: 100,
-              width: 52,
-              height: 52,
-              alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden",
-            }}
-          >
-            <Ionicons name="mic" size={20} color="#fff" />
-          </GlassView>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity activeOpacity={0.8} onPress={onChat}>
+        <GlassView
+          colorScheme="dark"
+          style={{
+            backgroundColor: "#2A6B3C",
+            borderRadius: 100,
+            height: 52,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            overflow: "hidden",
+          }}
+        >
+          <Ionicons name="sparkles" size={18} color="#fff" />
+          <Text style={{ color: "#fff", fontSize: 15, fontWeight: "600" }}>
+            Chat with Caliber
+          </Text>
+        </GlassView>
+      </TouchableOpacity>
       {recordingUri != null && <AudioPlayer uri={recordingUri} speed={speed} onSpeedPress={onSpeedPress} />}
     </View>
   );
@@ -831,14 +813,27 @@ function InProgressBar({
     }
   }
 
-  async function handleEnd() {
-    try {
-      await audioRecorder.stop();
-      onRecorderStateChange("idle");
-    } catch (e) {
-      console.warn("Stop failed:", e);
-    }
-    onEnd(audioRecorder.uri ?? null);
+  function handleEnd() {
+    Alert.alert(
+      "End recording?",
+      "You won\u2019t be able to re-record this interview.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "End",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await audioRecorder.stop();
+              onRecorderStateChange("idle");
+            } catch (e) {
+              console.warn("Stop failed:", e);
+            }
+            onEnd(audioRecorder.uri ?? null);
+          },
+        },
+      ]
+    );
   }
 
   return (
@@ -932,6 +927,8 @@ export default function InterviewDetail() {
   const [editRole, setEditRole] = useState(interview?.role ?? roleTemplates[0]?.role ?? "");
   const [draftScores, setDraftScores] = useState<CriterionScore[] | null>(null);
   const [draftFeedback, setDraftFeedback] = useState<import("../../constants/mock-data").InterviewFeedback | null>(null);
+  const [draftSummary, setDraftSummary] = useState<import("../../constants/mock-data").AISummary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const [recorderState, setRecorderState] = useState<RecorderState>("idle");
   const [speed, setSpeed] = useState(1);
@@ -1120,11 +1117,11 @@ export default function InterviewDetail() {
               <Text style={{ fontSize: 24, fontWeight: "700", color: "#1A1A1A" }}>
                 AI Summary
               </Text>
-              {interview?.aiSummary && (
+              {(interview?.aiSummary || draftSummary) && (
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={async () => {
-                    const s = interview!.aiSummary!;
+                    const s = (interview?.aiSummary ?? draftSummary)!;
                     const text = [
                       `Experience: ${s.experienceSnapshot}`,
                       `Highlights: ${s.keyHighlights.join(", ")}`,
@@ -1140,8 +1137,14 @@ export default function InterviewDetail() {
                 </TouchableOpacity>
               )}
             </View>
-            {interview?.aiSummary ? (
-              <SummaryCard summary={interview.aiSummary} />
+            {(interview?.aiSummary || draftSummary) ? (
+              <SummaryCard summary={(interview?.aiSummary ?? draftSummary)!} />
+            ) : summaryLoading ? (
+              <View style={{ backgroundColor: "#fff", borderRadius: 14, borderCurve: "continuous", padding: 32, alignItems: "center", gap: 12, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                <Ionicons name="sparkles" size={28} color="#2A6B3C" />
+                <Text style={{ fontSize: 15, fontWeight: "600", color: "#1A1A1A" }}>Generating summary...</Text>
+                <Text style={{ fontSize: 13, color: "#8E8E8E", textAlign: "center" }}>Caliber is analyzing your interview recording</Text>
+              </View>
             ) : (
               <PlaceholderCard label="AI Summary" />
             )}
@@ -1245,7 +1248,7 @@ export default function InterviewDetail() {
           {status === "upcoming" && (
             <UpcomingBar onStart={() => setStatus("inprogress")} />
           )}
-          {status === "past" && <PastBar onChat={() => router.push(`/chat?interviewId=${id}`)} onResume={() => setStatus("inprogress")} recordingUri={recordingUri} speed={speed} onSpeedPress={() => setShowSpeedSheet(true)} />}
+          {status === "past" && <PastBar onChat={() => router.push(`/chat?interviewId=${id}`)} recordingUri={recordingUri} speed={speed} onSpeedPress={() => setShowSpeedSheet(true)} />}
           {status === "inprogress" && (
             <InProgressBar
               audioRecorder={audioRecorder}
@@ -1276,6 +1279,22 @@ export default function InterviewDetail() {
                     ],
                     suggestedFollowUp: "Schedule a brief follow-up to clarify availability and confirm any outstanding documentation before extending an offer.",
                   });
+                  setSummaryLoading(true);
+                  setTimeout(() => {
+                    setDraftSummary({
+                      experienceSnapshot: `${editName || "The candidate"} has relevant experience for the ${editRole} position. Demonstrated familiarity with the day-to-day responsibilities and showed they can hit the ground running.`,
+                      keyHighlights: [
+                        "Gave specific, measurable examples from prior roles",
+                        "Showed genuine enthusiasm for the brand and the position",
+                        "Strong communication skills throughout the interview",
+                        "Comfortable with the physical and scheduling demands of the role",
+                      ],
+                      communicationFit: "Clear and confident communicator. Maintained good energy and answered follow-up questions without hesitation. Would represent the brand well in a customer-facing role.",
+                      notedGaps: "Some scheduling constraints were left unresolved. Would benefit from a follow-up conversation to confirm availability during peak hours.",
+                      availability: "Generally flexible. A few constraints mentioned during the interview that need written confirmation.",
+                    });
+                    setSummaryLoading(false);
+                  }, 3000);
                 }
               }}
             />
