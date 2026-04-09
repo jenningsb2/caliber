@@ -224,20 +224,20 @@ export default function InterviewsScreen() {
 
       {/* Floating action bar */}
       <View style={[styles.fab, { bottom: insets.bottom + 16 }]}>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => router.push("/chat")}>
-          <GlassView colorScheme="dark" style={styles.fabChat}>
-            <Ionicons name="sparkles" size={20} color="#fff" />
-          </GlassView>
-        </TouchableOpacity>
         <TouchableOpacity activeOpacity={0.8} onPress={() => router.push("/dialer")}>
           <GlassView colorScheme="dark" style={styles.fabPhone}>
             <Ionicons name="call" size={20} color="#fff" />
           </GlassView>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.fabStart} activeOpacity={0.8}>
-          <GlassView colorScheme="dark" style={styles.fabStartGlass}>
-            <Ionicons name="mic" size={18} color="#fff" />
-            <Text style={styles.fabStartText}>Start interview</Text>
+        <TouchableOpacity style={styles.fabChat} activeOpacity={0.8} onPress={() => router.push("/chat")}>
+          <GlassView colorScheme="dark" style={styles.fabChatGlass}>
+            <Ionicons name="sparkles" size={18} color="#fff" />
+            <Text style={styles.fabChatText}>Chat with Caliber</Text>
+          </GlassView>
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.8}>
+          <GlassView colorScheme="dark" style={styles.fabMic}>
+            <Ionicons name="mic" size={20} color="#fff" />
           </GlassView>
         </TouchableOpacity>
       </View>
@@ -482,17 +482,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
-  fabChat: {
-    backgroundColor: "#2A6B3C",
-    borderRadius: 100,
-    width: 52,
-    height: 52,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
   fabPhone: {
-    backgroundColor: "#2A6B3C",
+    backgroundColor: "rgba(0,0,0,0.75)",
     borderRadius: 100,
     width: 52,
     height: 52,
@@ -500,11 +491,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     overflow: "hidden",
   },
-  fabStart: {
+  fabChat: {
     flex: 1,
   },
-  fabStartGlass: {
-    backgroundColor: "rgba(0,0,0,0.75)",
+  fabChatGlass: {
+    backgroundColor: "#2A6B3C",
     borderRadius: 100,
     height: 52,
     alignItems: "center",
@@ -513,9 +504,18 @@ const styles = StyleSheet.create({
     gap: 8,
     overflow: "hidden",
   },
-  fabStartText: {
+  fabChatText: {
     color: "#fff",
     fontSize: 15,
     fontWeight: "600",
+  },
+  fabMic: {
+    backgroundColor: "rgba(0,0,0,0.75)",
+    borderRadius: 100,
+    width: 52,
+    height: 52,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
   },
 });

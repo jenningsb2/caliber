@@ -540,7 +540,7 @@ function PastBar({ onChat, onResume, recordingUri, speed, onSpeedPress }: { onCh
           <GlassView
             colorScheme="dark"
             style={{
-              backgroundColor: "rgba(0,0,0,0.75)",
+              backgroundColor: "#2A6B3C",
               borderRadius: 100,
               height: 52,
               flexDirection: "row",
@@ -550,7 +550,7 @@ function PastBar({ onChat, onResume, recordingUri, speed, onSpeedPress }: { onCh
               overflow: "hidden",
             }}
           >
-            <Ionicons name="sparkles-outline" size={18} color="#fff" />
+            <Ionicons name="sparkles" size={18} color="#fff" />
             <Text style={{ color: "#fff", fontSize: 15, fontWeight: "600" }}>
               Chat with Caliber
             </Text>
@@ -569,7 +569,7 @@ function PastBar({ onChat, onResume, recordingUri, speed, onSpeedPress }: { onCh
               overflow: "hidden",
             }}
           >
-            <Ionicons name="mic-outline" size={20} color="#fff" />
+            <Ionicons name="mic" size={20} color="#fff" />
           </GlassView>
         </TouchableOpacity>
       </View>
