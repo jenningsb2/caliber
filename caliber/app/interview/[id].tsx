@@ -205,7 +205,7 @@ function CoachingCard({ interview, interviewStatus }: { interview: import("../..
   }
 
   // ── Upcoming: interview guide ─────────────────────────────────────────────
-  if (interviewStatus === "upcoming") {
+  if (interviewStatus === "upcoming" || interviewStatus === "inprogress") {
     return (
       <View style={{ gap: 12 }}>
         <View style={{ backgroundColor: "#fff", borderRadius: 14, borderCurve: "continuous", padding: 16, gap: 10, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
@@ -930,6 +930,8 @@ export default function InterviewDetail() {
   );
   const [editName, setEditName] = useState(interview?.name ?? "");
   const [editRole, setEditRole] = useState(interview?.role ?? roleTemplates[0]?.role ?? "");
+  const [draftScores, setDraftScores] = useState<CriterionScore[] | null>(null);
+  const [draftFeedback, setDraftFeedback] = useState<import("../../constants/mock-data").InterviewFeedback | null>(null);
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const [recorderState, setRecorderState] = useState<RecorderState>("idle");
   const [speed, setSpeed] = useState(1);
@@ -1147,7 +1149,11 @@ export default function InterviewDetail() {
         )}
         {activeTab === "Coaching" && (
           <CoachingCard
-            interview={interview ?? { id: "new", name: editName, role: editRole, durationMin: 0, type: "In-person", date: "Today", time: "", candidateStatus: "Applied" }}
+            interview={{
+              ...(interview ?? { id: "new", name: editName, role: editRole, durationMin: 0, type: "In-person" as const, date: "Today", time: "", candidateStatus: "Applied" as const }),
+              criterionScores: interview?.criterionScores ?? draftScores ?? undefined,
+              interviewerFeedback: interview?.interviewerFeedback ?? draftFeedback ?? undefined,
+            }}
             interviewStatus={status}
           />
         )}
@@ -1245,7 +1251,33 @@ export default function InterviewDetail() {
               audioRecorder={audioRecorder}
               recorderState={recorderState}
               onRecorderStateChange={setRecorderState}
-              onEnd={(uri) => { setRecordingUri(uri); setStatus("past"); }}
+              onEnd={(uri) => {
+                setRecordingUri(uri);
+                setStatus("past");
+                if (!interview?.criterionScores) {
+                  const template = roleTemplates.find((t) => t.role === editRole);
+                  if (template) {
+                    setDraftScores(template.criteria.map((c) => ({
+                      criterionId: c.id,
+                      score: Math.floor(Math.random() * 2) + 3,
+                      note: "Demonstrated solid competency in this area with specific examples.",
+                    })));
+                  }
+                  setDraftFeedback({
+                    overallImpression: `${editName || "The candidate"} came across as a strong fit for the ${editRole} position. Gave clear, structured answers and showed genuine enthusiasm for the role.`,
+                    whatWentWell: [
+                      "Gave specific, relevant examples without excessive prompting.",
+                      "Demonstrated genuine interest in the role and the brand.",
+                      "Communicated clearly and maintained good energy throughout.",
+                    ],
+                    areasToImprove: [
+                      "Could have probed deeper on availability constraints \u2014 left some scheduling questions unresolved.",
+                      "Consider asking for a specific conflict resolution example earlier in the conversation.",
+                    ],
+                    suggestedFollowUp: "Schedule a brief follow-up to clarify availability and confirm any outstanding documentation before extending an offer.",
+                  });
+                }
+              }}
             />
           )}
         </View>
