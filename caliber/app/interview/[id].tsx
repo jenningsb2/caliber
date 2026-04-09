@@ -14,7 +14,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useBrand } from "../../contexts/brand-context";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActionSheetIOS, Alert, Animated, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActionSheetIOS, Alert, Animated, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import potbellyLogo from "../../assets/images/Potbelly_Sandwich_Shop_logo.png";
 import tacoBellLogo from "../../assets/images/taco_bell_logo.png";
@@ -366,6 +366,158 @@ const MOCK_TRANSCRIPT: TranscriptLine[] = [
   { speaker: "candidate",   text: "Yeah — what does growth look like here? I'm interested in eventually moving into a shift lead or management role." },
 ];
 
+
+// ─── Comments ───────────────────────────────────────────────────────────────
+
+type CommentAuthor = {
+  name: string;
+  initials: string;
+  role: "interviewer" | "admin";
+  color: string;
+};
+
+const ADMIN_BY_BRAND: Record<string, CommentAuthor> = {
+  potbelly: { name: "Brandi Adams", initials: "BA", role: "admin", color: "#5B5FC7" },
+  tacobell: { name: "Ken Guardino", initials: "KG", role: "admin", color: "#5B5FC7" },
+};
+
+const ME: CommentAuthor = { name: "Me", initials: "BJ", role: "interviewer", color: "#2A6B3C" };
+
+type Comment = {
+  id: string;
+  author: CommentAuthor;
+  text: string;
+  time: string;
+};
+
+function getMockComments(brand: string): Comment[] {
+  const admin = ADMIN_BY_BRAND[brand] ?? ADMIN_BY_BRAND.potbelly;
+  return [
+    {
+      id: "c1",
+      author: admin,
+      text: "Nice work on this one. The conflict resolution probing was solid \u2014 you got a specific example without leading him.",
+      time: "Sun, 3:15 PM",
+    },
+    {
+      id: "c2",
+      author: ME,
+      text: "Thanks! I almost let the scheduling question slide but circled back. Still didn\u2019t pin down Sunday availability though.",
+      time: "Sun, 3:22 PM",
+    },
+    {
+      id: "c3",
+      author: admin,
+      text: "Yeah, that\u2019s the one gap. Before we move forward, can you follow up with him on Sundays? Also \u2014 the \u201cover-qualified\u201d concern is real. Make sure to frame the development path early in the next conversation so he doesn\u2019t lose interest.",
+      time: "Sun, 3:30 PM",
+    },
+    {
+      id: "c4",
+      author: ME,
+      text: `@${admin.name} will do \u2014 I\u2019ll reach out tomorrow and report back.`,
+      time: "Sun, 3:35 PM",
+    },
+    {
+      id: "c5",
+      author: admin,
+      text: "Perfect. One more thing \u2014 next time try to ask about their long-term goals earlier in the conversation. He brought it up at the end but it would\u2019ve helped shape your questions throughout. Overall though, really strong interview @BJ.",
+      time: "Sun, 3:42 PM",
+    },
+  ];
+}
+
+function renderCommentText(text: string) {
+  // Match @Name or @First Last (greedy two-word match)
+  const parts = text.split(/(@[A-Z][a-z]+(?:\s[A-Z][a-z]+)?)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("@")) {
+      return (
+        <Text key={i} style={{ fontWeight: "600", color: "#5B5FC7" }}>
+          {part}
+        </Text>
+      );
+    }
+    return <Text key={i}>{part}</Text>;
+  });
+}
+
+function CommentsThread({
+  comments,
+  onSend,
+}: {
+  comments: Comment[];
+  onSend: (text: string) => void;
+}) {
+  const [input, setInput] = useState("");
+
+  function handleSend() {
+    const trimmed = input.trim();
+    if (!trimmed) return;
+    onSend(trimmed);
+    setInput("");
+  }
+
+  return (
+    <>
+      <View style={{ backgroundColor: "#fff", borderRadius: 14, borderCurve: "continuous", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+        {comments.map((comment, i) => (
+          <View key={comment.id}>
+            {i > 0 && <View style={{ height: 0.5, backgroundColor: "rgba(0,0,0,0.08)" }} />}
+            <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12, padding: 14 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: comment.author.color, alignItems: "center", justifyContent: "center" }}>
+                <Text style={{ fontSize: 13, fontWeight: "700", color: "#fff" }}>{comment.author.initials}</Text>
+              </View>
+              <View style={{ flex: 1, gap: 2 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  <Text style={{ fontSize: 13, fontWeight: "600", color: "#1A1A1A" }}>
+                    {comment.author.name}
+                  </Text>
+                  {comment.author.role === "admin" && (
+                    <View style={{ backgroundColor: "#EDEDFF", borderRadius: 6, borderCurve: "continuous", paddingHorizontal: 6, paddingVertical: 1 }}>
+                      <Text style={{ fontSize: 11, fontWeight: "600", color: "#5B5FC7" }}>HR</Text>
+                    </View>
+                  )}
+                  <Text style={{ fontSize: 12, color: "#8E8E8E" }}>{comment.time}</Text>
+                </View>
+                <Text style={{ fontSize: 14, color: "#3A3A3A", lineHeight: 20 }}>
+                  {renderCommentText(comment.text)}
+                </Text>
+              </View>
+            </View>
+          </View>
+        ))}
+      </View>
+
+      {/* Compose */}
+      <View style={{ backgroundColor: "#fff", borderRadius: 14, borderCurve: "continuous", paddingHorizontal: 12, paddingTop: 10, paddingBottom: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.06)", gap: 6 }}>
+        <TextInput
+          style={{ fontSize: 14, color: "#1A1A1A", minHeight: 20, maxHeight: 80, paddingHorizontal: 2 }}
+          placeholder="Add a comment..."
+          placeholderTextColor="#8E8E8E"
+          value={input}
+          onChangeText={setInput}
+          multiline
+        />
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <TouchableOpacity
+            onPress={() => setInput((prev) => prev + "@")}
+            activeOpacity={0.7}
+            style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#F0F0F0", alignItems: "center", justifyContent: "center" }}
+          >
+            <Ionicons name="at" size={16} color="#8E8E8E" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleSend}
+            activeOpacity={0.7}
+            style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: input.trim() ? "#2A6B3C" : "#DEDEDE", alignItems: "center", justifyContent: "center" }}
+          >
+            <Ionicons name="send" size={14} color={input.trim() ? "#fff" : "#8E8E8E"} />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </>
+  );
+}
 
 // ─── Bottom Action Bars ───────────────────────────────────────────────────────
 
@@ -739,6 +891,7 @@ export default function InterviewDetail() {
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const [recorderState, setRecorderState] = useState<RecorderState>("idle");
   const [speed, setSpeed] = useState(1);
+  const [comments, setComments] = useState<Comment[]>(() => getMockComments(brand));
   const [showSpeedSheet, setShowSpeedSheet] = useState(false);
   const speedSheetRef = useRef<BottomSheet>(null);
 
@@ -845,6 +998,8 @@ export default function InterviewDetail() {
 
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
+        automaticallyAdjustKeyboardInsets
+        keyboardDismissMode="on-drag"
         style={{ flex: 1 }}
         contentContainerStyle={{
           padding: 16,
@@ -971,7 +1126,22 @@ export default function InterviewDetail() {
             )}
           </>
         )}
-        {activeTab === "Comments" && <PlaceholderCard label="Comments" />}
+        {activeTab === "Comments" && (
+          <CommentsThread
+            comments={comments}
+            onSend={(text) => {
+              setComments((prev) => [
+                ...prev,
+                {
+                  id: `c-${Date.now()}`,
+                  author: ME,
+                  text,
+                  time: "Just now",
+                },
+              ]);
+            }}
+          />
+        )}
       </ScrollView>
 
       {/* Floating action bar */}
