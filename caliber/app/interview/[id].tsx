@@ -14,7 +14,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useBrand } from "../../contexts/brand-context";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActionSheetIOS, Alert, Animated, Keyboard, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActionSheetIOS, Alert, Animated, Keyboard, Linking, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import potbellyLogo from "../../assets/images/Potbelly_Sandwich_Shop_logo.png";
 import tacoBellLogo from "../../assets/images/taco_bell_logo.png";
@@ -946,6 +946,8 @@ export default function InterviewDetail() {
   );
   const [editName, setEditName] = useState(interview?.name ?? "");
   const [editRole, setEditRole] = useState(interview?.role ?? roleTemplates[0]?.role ?? "");
+  const [editPhone, setEditPhone] = useState(interview?.phone ?? "");
+  const [editEmail, setEditEmail] = useState(interview?.email ?? "");
   const [draftScores, setDraftScores] = useState<CriterionScore[] | null>(null);
   const [draftFeedback, setDraftFeedback] = useState<import("../../constants/mock-data").InterviewFeedback | null>(null);
   const [draftSummary, setDraftSummary] = useState<import("../../constants/mock-data").AISummary | null>(null);
@@ -1086,13 +1088,62 @@ export default function InterviewDetail() {
         showsVerticalScrollIndicator={false}
       >
         {/* Editable name */}
-        <TextInput
-          style={{ fontSize: 24, fontWeight: "700", color: "#1A1A1A", padding: 0 }}
-          value={editName}
-          onChangeText={setEditName}
-          placeholder={isNew ? "New Interview" : "Candidate name"}
-          placeholderTextColor="#C0C0C0"
-        />
+        <View style={{ gap: 8 }}>
+          <TextInput
+            style={{ fontSize: 24, fontWeight: "700", color: "#1A1A1A", padding: 0 }}
+            value={editName}
+            onChangeText={setEditName}
+            placeholder={isNew ? "New Interview" : "Candidate name"}
+            placeholderTextColor="#C0C0C0"
+          />
+          <View style={{ flexDirection: "row", gap: 12, flexWrap: "wrap" }}>
+            {editPhone ? (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => Linking.openURL(`tel:${editPhone}`).catch(() => {})}
+                style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+              >
+                <Ionicons name="call-outline" size={14} color="#2A6B3C" />
+                <Text style={{ fontSize: 13, color: "#2A6B3C", fontWeight: "500" }}>{editPhone}</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                <Ionicons name="call-outline" size={14} color="#C0C0C0" />
+                <TextInput
+                  style={{ fontSize: 13, color: "#1A1A1A", fontWeight: "500", padding: 0, minWidth: 80 }}
+                  placeholder="Add phone"
+                  placeholderTextColor="#C0C0C0"
+                  value={editPhone}
+                  onChangeText={setEditPhone}
+                  keyboardType="phone-pad"
+                />
+              </View>
+            )}
+            {editEmail ? (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => Linking.openURL(`mailto:${editEmail}`).catch(() => {})}
+                style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+              >
+                <Ionicons name="mail-outline" size={14} color="#2A6B3C" />
+                <Text style={{ fontSize: 13, color: "#2A6B3C", fontWeight: "500" }}>{editEmail}</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                <Ionicons name="mail-outline" size={14} color="#C0C0C0" />
+                <TextInput
+                  style={{ fontSize: 13, color: "#1A1A1A", fontWeight: "500", padding: 0, minWidth: 80 }}
+                  placeholder="Add email"
+                  placeholderTextColor="#C0C0C0"
+                  value={editEmail}
+                  onChangeText={setEditEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+            )}
+          </View>
+        </View>
 
         {/* Pill badges */}
         <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>

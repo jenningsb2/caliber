@@ -46,6 +46,8 @@ export interface Interview {
   type: InterviewType;
   date: string;
   time: string;
+  email?: string;
+  phone?: string;
   rating?: number;
   score?: { value: number; outOf: number };
   criterionScores?: CriterionScore[];
@@ -139,6 +141,8 @@ export const UPCOMING: Interview[] = [
     type: "In-person",
     date: "Today",
     time: "10:00 AM",
+    email: "jordan.patel@gmail.com",
+    phone: "(312) 555-0147",
     candidateStatus: "Screening",
   },
   {
@@ -149,6 +153,8 @@ export const UPCOMING: Interview[] = [
     type: "Phone",
     date: "Today",
     time: "11:15 AM",
+    email: "aisha.rahman@gmail.com",
+    phone: "(312) 555-0238",
     candidateStatus: "Applied",
   },
   {
@@ -159,6 +165,8 @@ export const UPCOMING: Interview[] = [
     type: "Phone",
     date: "Today",
     time: "1:00 PM",
+    email: "devon.carter@yahoo.com",
+    phone: "(312) 555-0391",
     candidateStatus: "Applied",
   },
   {
@@ -169,6 +177,8 @@ export const UPCOMING: Interview[] = [
     type: "Google Meet",
     date: "Today",
     time: "2:30 PM",
+    email: "sofia.alvarez@gmail.com",
+    phone: "(312) 555-0412",
     candidateStatus: "Screening",
   },
 ];
@@ -184,6 +194,8 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         role: "Shift Lead",
         durationMin: 45,
         type: "In-person",
+        email: "marcus.webb@gmail.com",
+        phone: "(312) 555-0519",
         date: "Sun",
         time: "10:00 AM",
         rating: 4.8,
@@ -231,6 +243,8 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         role: "Delivery Driver",
         durationMin: 30,
         type: "Phone",
+        email: "carlos.mendoza@hotmail.com",
+        phone: "(312) 555-0623",
         date: "Sun",
         time: "11:30 AM",
         rating: 4.2,
@@ -282,6 +296,8 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         role: "Cashier",
         durationMin: 20,
         type: "Phone",
+        email: "priya.nair@gmail.com",
+        phone: "(312) 555-0734",
         date: "Fri",
         time: "9:30 AM",
         rating: 4.9,
@@ -328,6 +344,8 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         role: "Shift Lead",
         durationMin: 45,
         type: "In-person",
+        email: "james.okafor@gmail.com",
+        phone: "(312) 555-0845",
         date: "Fri",
         time: "2:00 PM",
         rating: 4.6,
@@ -374,6 +392,8 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         role: "Sandwich Associate",
         durationMin: 20,
         type: "Phone",
+        email: "lily.chen@outlook.com",
+        phone: "(312) 555-0956",
         date: "Fri",
         time: "4:00 PM",
         rating: 4.7,
@@ -424,6 +444,8 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         role: "Delivery Driver",
         durationMin: 30,
         type: "Google Meet",
+        email: "tyrese.brown@gmail.com",
+        phone: "(312) 555-1067",
         date: "Thu",
         time: "11:00 AM",
         rating: 3.9,
@@ -469,6 +491,8 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         role: "Cashier",
         durationMin: 20,
         type: "Phone",
+        email: "fatima.alhassan@gmail.com",
+        phone: "(312) 555-1178",
         date: "Thu",
         time: "1:30 PM",
         rating: 4.4,
@@ -520,6 +544,8 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         role: "Shift Lead",
         durationMin: 45,
         type: "In-person",
+        email: "noah.reyes@yahoo.com",
+        phone: "(312) 555-1289",
         date: "Wed",
         time: "10:00 AM",
         rating: 4.3,
@@ -566,6 +592,8 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         role: "Sandwich Associate",
         durationMin: 20,
         type: "Phone",
+        email: "imani.jackson@gmail.com",
+        phone: "(312) 555-1390",
         date: "Wed",
         time: "2:15 PM",
         rating: 4.1,
