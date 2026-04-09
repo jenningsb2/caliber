@@ -11,7 +11,8 @@ import * as Clipboard from "expo-clipboard";
 import { GlassView } from "expo-glass-effect";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ActionSheetIOS, Alert, Animated, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import potbellyLogo from "../../assets/images/Potbelly_Sandwich_Shop_logo.png";
@@ -387,7 +388,11 @@ function UpcomingBar({ onStart }: { onStart: () => void }) {
   );
 }
 
-function AudioPlayer({ uri }: { uri: string }) {
+function formatSpeed(s: number) {
+  return s === Math.floor(s) ? `${s}×` : `${s}×`;
+}
+
+function AudioPlayer({ uri, speed, onSpeedPress }: { uri: string; speed: number; onSpeedPress: () => void }) {
   const player = useAudioPlayer({ uri });
   const status = useAudioPlayerStatus(player);
   const [barWidth, setBarWidth] = useState(0);
@@ -397,12 +402,15 @@ function AudioPlayer({ uri }: { uri: string }) {
   const progress = total > 0 ? current / total : 0;
   const [finished, setFinished] = useState(false);
 
-  // Mark finished when playback stops at the end
   useEffect(() => {
     if (!status.playing && total > 0 && current >= total - 0.5) {
       setFinished(true);
     }
   }, [status.playing]);
+
+  useEffect(() => {
+    player.setPlaybackRate(speed);
+  }, [speed]);
 
   function handlePlay() {
     if (finished) {
@@ -420,85 +428,105 @@ function AudioPlayer({ uri }: { uri: string }) {
   }
 
   return (
-    <View
-      style={{
-        backgroundColor: "#fff",
-        borderRadius: 100,
-        borderCurve: "continuous",
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-        borderWidth: 1,
-        borderColor: "rgba(0,0,0,0.07)",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-      }}
-    >
-      <TouchableOpacity
-        onPress={() => (status.playing ? player.pause() : handlePlay())}
+    <>
+      <View
         style={{
-          backgroundColor: "#2D2D2D",
+          backgroundColor: "#fff",
           borderRadius: 100,
-          width: 44,
-          height: 44,
+          borderCurve: "continuous",
+          paddingVertical: 10,
+          paddingHorizontal: 10,
+          flexDirection: "row",
           alignItems: "center",
-          justifyContent: "center",
+          gap: 12,
+          borderWidth: 1,
+          borderColor: "rgba(0,0,0,0.07)",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
         }}
-        activeOpacity={0.8}
       >
-        <Ionicons name={status.playing ? "pause" : "play"} size={18} color="#fff" />
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => (status.playing ? player.pause() : handlePlay())}
+          style={{
+            backgroundColor: "#2D2D2D",
+            borderRadius: 100,
+            width: 44,
+            height: 44,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          activeOpacity={0.8}
+        >
+          <Ionicons name={status.playing ? "pause" : "play"} size={18} color="#fff" />
+        </TouchableOpacity>
 
-      <View style={{ flex: 1, gap: 6, paddingRight: 10 }}>
-        {/* Scrubber */}
-        <View onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}>
-          <Pressable
-            style={{ height: 20, justifyContent: "center" }}
-            onPress={(e) => handleSeek(e.nativeEvent.locationX)}
-          >
-            <View style={{ height: 3, backgroundColor: "#E0E0E0", borderRadius: 2 }}>
-              <View
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: barWidth * progress,
-                  backgroundColor: "#1A1A1A",
-                  borderRadius: 2,
-                }}
-              />
-            </View>
-            {barWidth > 0 && (
-              <View
-                style={{
-                  position: "absolute",
-                  left: Math.max(0, barWidth * progress - 5),
-                  width: 10,
-                  height: 10,
-                  borderRadius: 5,
-                  backgroundColor: "#1A1A1A",
-                }}
-              />
-            )}
-          </Pressable>
+        <View style={{ flex: 1, gap: 6 }}>
+          {/* Scrubber */}
+          <View onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}>
+            <Pressable
+              style={{ height: 20, justifyContent: "center" }}
+              onPress={(e) => handleSeek(e.nativeEvent.locationX)}
+            >
+              <View style={{ height: 3, backgroundColor: "#E0E0E0", borderRadius: 2 }}>
+                <View
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: barWidth * progress,
+                    backgroundColor: "#1A1A1A",
+                    borderRadius: 2,
+                  }}
+                />
+              </View>
+              {barWidth > 0 && (
+                <View
+                  style={{
+                    position: "absolute",
+                    left: Math.max(0, barWidth * progress - 5),
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    backgroundColor: "#1A1A1A",
+                  }}
+                />
+              )}
+            </Pressable>
+          </View>
+          {/* Times */}
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <Text style={{ fontSize: 12, color: "#8E8E8E", fontVariant: ["tabular-nums"] }}>
+              {formatTime(current)}
+            </Text>
+            <Text style={{ fontSize: 12, color: "#8E8E8E", fontVariant: ["tabular-nums"] }}>
+              {formatTime(total)}
+            </Text>
+          </View>
         </View>
-        {/* Times */}
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={{ fontSize: 12, color: "#8E8E8E", fontVariant: ["tabular-nums"] }}>
-            {formatTime(current)}
+
+        {/* Speed button */}
+        <TouchableOpacity
+          onPress={onSpeedPress}
+          activeOpacity={0.7}
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 100,
+            backgroundColor: speed !== 1 ? "#2A6B3C" : "#F0F0F0",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ fontSize: 12, fontWeight: "700", color: speed !== 1 ? "#fff" : "#1A1A1A" }}>
+            {formatSpeed(speed)}
           </Text>
-          <Text style={{ fontSize: 12, color: "#8E8E8E", fontVariant: ["tabular-nums"] }}>
-            {formatTime(total)}
-          </Text>
-        </View>
+        </TouchableOpacity>
       </View>
-    </View>
+    </>
   );
 }
 
-function PastBar({ onResume, recordingUri }: { onResume: () => void; recordingUri: string | null }) {
+function PastBar({ onResume, recordingUri, speed, onSpeedPress }: { onResume: () => void; recordingUri: string | null; speed: number; onSpeedPress: () => void }) {
   return (
     <View style={{ gap: 10 }}>
       <View style={{ flexDirection: "row", gap: 10 }}>
@@ -539,7 +567,7 @@ function PastBar({ onResume, recordingUri }: { onResume: () => void; recordingUr
           </GlassView>
         </TouchableOpacity>
       </View>
-      {recordingUri != null && <AudioPlayer uri={recordingUri} />}
+      {recordingUri != null && <AudioPlayer uri={recordingUri} speed={speed} onSpeedPress={onSpeedPress} />}
     </View>
   );
 }
@@ -656,6 +684,9 @@ function InProgressBar({
             alignItems: "center",
             justifyContent: "center",
             overflow: "hidden",
+            backgroundColor: "rgba(255,255,255,0.85)",
+            borderWidth: 1,
+            borderColor: "rgba(0,0,0,0.12)",
           }}
         >
           <Text style={{ fontSize: 15, fontWeight: "600", color: "#1A1A1A" }}>End</Text>
@@ -684,6 +715,24 @@ export default function InterviewDetail() {
   );
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const [recorderState, setRecorderState] = useState<RecorderState>("idle");
+  const [speed, setSpeed] = useState(1);
+  const [showSpeedSheet, setShowSpeedSheet] = useState(false);
+  const speedSheetRef = useRef<BottomSheet>(null);
+
+  useEffect(() => {
+    if (showSpeedSheet) {
+      speedSheetRef.current?.expand();
+    } else {
+      speedSheetRef.current?.close();
+    }
+  }, [showSpeedSheet]);
+
+  const renderBackdrop = useCallback(
+    (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
+      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} pressBehavior="close" />
+    ),
+    []
+  );
   const toastY = useRef(new Animated.Value(100)).current;
   const toastOpacity = useRef(new Animated.Value(1)).current;
   const [toastVisible, setToastVisible] = useState(false);
@@ -911,7 +960,7 @@ export default function InterviewDetail() {
         {status === "upcoming" && (
           <UpcomingBar onStart={() => setStatus("inprogress")} />
         )}
-        {status === "past" && <PastBar onResume={() => setStatus("inprogress")} recordingUri={recordingUri} />}
+        {status === "past" && <PastBar onResume={() => setStatus("inprogress")} recordingUri={recordingUri} speed={speed} onSpeedPress={() => setShowSpeedSheet(true)} />}
         {status === "inprogress" && (
           <InProgressBar
             audioRecorder={audioRecorder}
@@ -949,6 +998,44 @@ export default function InterviewDetail() {
         </Animated.View>
       )}
 
+      <BottomSheet
+        ref={speedSheetRef}
+        index={-1}
+        enableDynamicSizing
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+        onClose={() => setShowSpeedSheet(false)}
+      >
+        <BottomSheetView style={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 24 }}>
+          {/* Large speed readout */}
+          <Text style={{ fontSize: 52, fontWeight: "700", color: "#1A1A1A", textAlign: "center", marginTop: 8, marginBottom: 28 }}>
+            {speed % 1 === 0 ? `${speed}.0×` : `${speed}×`}
+          </Text>
+          {/* Preset pills */}
+          <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 10, marginBottom: 8 }}>
+            {([0.5, 1, 1.5, 2, 2.5, 3, 3.5] as number[]).map((p) => {
+              const active = speed === p;
+              return (
+                <TouchableOpacity
+                  key={p}
+                  onPress={() => setSpeed(p)}
+                  activeOpacity={0.7}
+                  style={{
+                    paddingVertical: 10,
+                    paddingHorizontal: 18,
+                    borderRadius: 20,
+                    backgroundColor: active ? "#2A6B3C" : "#F0F0F0",
+                  }}
+                >
+                  <Text style={{ fontSize: 15, fontWeight: "600", color: active ? "#fff" : "#1A1A1A" }}>
+                    {p % 1 === 0 ? `${p}.0×` : `${p}×`}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </BottomSheetView>
+      </BottomSheet>
     </>
   );
 }
