@@ -915,17 +915,21 @@ export default function InterviewDetail() {
   }>();
   const isPeek = peek === "1";
 
+  const isNew = id === "new";
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { brand } = useBrand();
   const interviewMap = useMemo(() => getBrandInterviewMap(brand), [brand]);
-  const interview = interviewMap[id];
-  const [status, setStatus] = useState<InterviewStatus>(statusParam ?? "upcoming");
+  const roleTemplates = useMemo(() => getBrandRoleTemplates(brand), [brand]);
+  const interview = isNew ? null : interviewMap[id];
+  const [status, setStatus] = useState<InterviewStatus>(statusParam ?? (isNew ? "inprogress" : "upcoming"));
   const [activeTab, setActiveTab] = useState<Tab>("Summary");
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
   const [candidateStatus, setCandidateStatus] = useState<CandidateStatus>(
     interview?.candidateStatus ?? "Applied"
   );
+  const [editName, setEditName] = useState(interview?.name ?? "");
+  const [editRole, setEditRole] = useState(interview?.role ?? roleTemplates[0]?.role ?? "");
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const [recorderState, setRecorderState] = useState<RecorderState>("idle");
   const [speed, setSpeed] = useState(1);
@@ -970,7 +974,7 @@ export default function InterviewDetail() {
     ]).start(() => setToastVisible(false));
   }
 
-  if (!interview) return null;
+  if (!isNew && !interview) return null;
 
   const STATUS_OPTIONS: CandidateStatus[] = ["Applied", "Screening", "Shortlisted", "Hired", "Rejected"];
 
@@ -995,6 +999,20 @@ export default function InterviewDetail() {
     }
   }
 
+  function showRolePicker() {
+    const roles = roleTemplates.map((t) => t.role);
+    ActionSheetIOS.showActionSheetWithOptions(
+      {
+        options: [...roles, "Cancel"],
+        cancelButtonIndex: roles.length,
+        title: "Select position",
+      },
+      (index) => {
+        if (index < roles.length) setEditRole(roles[index]);
+      }
+    );
+  }
+
   const statusStyle = STATUS_STYLE[candidateStatus];
   const bottomBarHeight = 52 + insets.bottom + 32;
 
@@ -1003,16 +1021,7 @@ export default function InterviewDetail() {
       <Stack.Screen
         options={{
           headerLargeTitle: false,
-          headerTitle: () => (
-            <View style={{ alignItems: "center", gap: 1 }}>
-              <Text style={{ fontSize: 17, fontWeight: "600", color: "#1A1A1A" }}>
-                {interview.name}
-              </Text>
-              <Text style={{ fontSize: 12, color: "#8E8E8E" }}>
-                {interview.role}
-              </Text>
-            </View>
-          ),
+          headerTitle: "",
         }}
       />
 
@@ -1056,15 +1065,32 @@ export default function InterviewDetail() {
         }}
         showsVerticalScrollIndicator={false}
       >
+        {/* Editable name */}
+        <TextInput
+          style={{ fontSize: 24, fontWeight: "700", color: "#1A1A1A", padding: 0 }}
+          value={editName}
+          onChangeText={setEditName}
+          placeholder={isNew ? "New Interview" : "Candidate name"}
+          placeholderTextColor="#C0C0C0"
+        />
+
         {/* Pill badges */}
         <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
+          <TouchableOpacity onPress={showRolePicker} activeOpacity={0.7}>
+            <Pill bg="#1A1A1A" color="#fff">
+              <Text style={{ color: "#fff", fontWeight: "500", fontSize: 13 }}>
+                {editRole}
+              </Text>
+              <Ionicons name="chevron-down" size={12} color="#fff" />
+            </Pill>
+          </TouchableOpacity>
           <Pill bg="#1A1A1A" color="#fff">
             <Ionicons name="calendar-outline" size={13} color="#fff" />
             <Text style={{ color: "#fff", fontWeight: "500", fontSize: 13 }}>
-              {interview.date} • {interview.time}
+              {interview?.date ?? "Today"} {"\u2022"} {interview?.time ?? new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
             </Text>
           </Pill>
-          {interview.score && (
+          {interview?.score && (
             <Pill bg="#2A6B3C" color="#fff">
               <Ionicons name="checkmark-circle" size={14} color="#fff" />
               <Text style={{ color: "#fff", fontWeight: "600", fontSize: 14 }}>
@@ -1092,11 +1118,11 @@ export default function InterviewDetail() {
               <Text style={{ fontSize: 24, fontWeight: "700", color: "#1A1A1A" }}>
                 AI Summary
               </Text>
-              {interview.aiSummary && (
+              {interview?.aiSummary && (
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={async () => {
-                    const s = interview.aiSummary!;
+                    const s = interview!.aiSummary!;
                     const text = [
                       `Experience: ${s.experienceSnapshot}`,
                       `Highlights: ${s.keyHighlights.join(", ")}`,
@@ -1112,14 +1138,19 @@ export default function InterviewDetail() {
                 </TouchableOpacity>
               )}
             </View>
-            {interview.aiSummary ? (
+            {interview?.aiSummary ? (
               <SummaryCard summary={interview.aiSummary} />
             ) : (
               <PlaceholderCard label="AI Summary" />
             )}
           </>
         )}
-        {activeTab === "Coaching" && <CoachingCard interview={interview} interviewStatus={status} />}
+        {activeTab === "Coaching" && (
+          <CoachingCard
+            interview={interview ?? { id: "new", name: editName, role: editRole, durationMin: 0, type: "In-person", date: "Today", time: "", candidateStatus: "Applied" }}
+            interviewStatus={status}
+          />
+        )}
         {activeTab === "Transcript" && (
           <>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
@@ -1129,7 +1160,7 @@ export default function InterviewDetail() {
                   activeOpacity={0.7}
                   onPress={async () => {
                     const text = MOCK_TRANSCRIPT.map((l) =>
-                      `${l.speaker === "interviewer" ? "Me" : interview.name}: ${l.text}`
+                      `${l.speaker === "interviewer" ? "Me" : editName || "Candidate"}: ${l.text}`
                     ).join("\n\n");
                     await Clipboard.setStringAsync(text);
                     showToast();
@@ -1143,7 +1174,7 @@ export default function InterviewDetail() {
               <View style={{ backgroundColor: "#fff", borderRadius: 14, borderCurve: "continuous", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
                 {MOCK_TRANSCRIPT.map((line, i) => {
                   const isInterviewer = line.speaker === "interviewer";
-                  const initial = interview.name.trim()[0]?.toUpperCase() ?? "?";
+                  const initial = (editName || "?").trim()[0]?.toUpperCase() ?? "?";
                   const showDivider = i > 0;
                   return (
                     <View key={i}>
@@ -1160,7 +1191,7 @@ export default function InterviewDetail() {
                         )}
                         <View style={{ flex: 1, gap: 2 }}>
                           <Text style={{ fontSize: 13, fontWeight: "600", color: "#1A1A1A" }}>
-                            {isInterviewer ? "Me" : interview.name}
+                            {isInterviewer ? "Me" : editName || "Candidate"}
                           </Text>
                           <Text style={{ fontSize: 14, color: "#3A3A3A", lineHeight: 20 }}>{line.text}</Text>
                         </View>

@@ -235,7 +235,7 @@ export default function InterviewsScreen() {
             <Text style={styles.fabChatText}>Chat with Caliber</Text>
           </GlassView>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.8}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => router.push("/interview/new?status=inprogress")}>
           <GlassView colorScheme="dark" style={styles.fabMic}>
             <Ionicons name="mic" size={20} color="#fff" />
           </GlassView>
