@@ -1276,6 +1276,7 @@ export default function InterviewDetail() {
           }}
         >
           {status === "past" && <PastBar onChat={() => router.push(`/chat?interviewId=${id}`)} recordingUri={recordingUri} speed={speed} onSpeedPress={() => setShowSpeedSheet(true)} />}
+          {(status === "upcoming" || status === "inprogress") && (
           <GlassView colorScheme="light" style={{ borderRadius: 32, borderCurve: "continuous", padding: 8, overflow: "hidden", backgroundColor: "rgba(255,255,255,0.1)", borderWidth: 0.5, borderColor: "rgba(0,0,0,0.08)" }}>
           {status === "upcoming" && (
             <UpcomingBar onStart={() => setStatus("inprogress")} />
@@ -1331,6 +1332,7 @@ export default function InterviewDetail() {
             />
           )}
           </GlassView>
+          )}
         </View>
       )}
 
