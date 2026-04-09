@@ -445,13 +445,30 @@ function CommentsThread({
   comments,
   onSend,
   scrollRef,
+  brand,
 }: {
   comments: Comment[];
   onSend: (text: string) => void;
   scrollRef?: React.RefObject<ScrollView | null>;
+  brand: string;
 }) {
   const [input, setInput] = useState("");
   const inputRef = useRef<TextInput>(null);
+  const admin = ADMIN_BY_BRAND[brand] ?? ADMIN_BY_BRAND.potbelly;
+
+  // Detect @mention in progress: find the last "@" and check if user is mid-typing
+  const mentionMatch = input.match(/@([A-Za-z]*)$/);
+  const mentionQuery = mentionMatch ? mentionMatch[1].toLowerCase() : null;
+  const showSuggestion =
+    mentionQuery !== null &&
+    admin.name.toLowerCase().startsWith(mentionQuery || "");
+
+  function handleSelectMention() {
+    // Replace the partial @query with the full @Name
+    const newInput = input.replace(/@[A-Za-z]*$/, `@${admin.name} `);
+    setInput(newInput);
+    inputRef.current?.focus();
+  }
 
   function handleSend() {
     const trimmed = input.trim();
@@ -493,6 +510,22 @@ function CommentsThread({
 
       {/* Compose */}
       <View style={{ backgroundColor: "#fff", borderRadius: 14, borderCurve: "continuous", paddingHorizontal: 12, paddingTop: 10, paddingBottom: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.06)", gap: 6 }}>
+        {/* Mention suggestion */}
+        {showSuggestion && (
+          <TouchableOpacity
+            onPress={handleSelectMention}
+            activeOpacity={0.7}
+            style={{ flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#F7F7FF", borderRadius: 10, borderCurve: "continuous", padding: 8 }}
+          >
+            <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: admin.color, alignItems: "center", justifyContent: "center" }}>
+              <Text style={{ fontSize: 11, fontWeight: "700", color: "#fff" }}>{admin.initials}</Text>
+            </View>
+            <Text style={{ fontSize: 14, fontWeight: "500", color: "#1A1A1A" }}>{admin.name}</Text>
+            <View style={{ backgroundColor: "#EDEDFF", borderRadius: 6, borderCurve: "continuous", paddingHorizontal: 6, paddingVertical: 1 }}>
+              <Text style={{ fontSize: 11, fontWeight: "600", color: "#5B5FC7" }}>Admin</Text>
+            </View>
+          </TouchableOpacity>
+        )}
         <TextInput
           ref={inputRef}
           style={{ fontSize: 14, color: "#1A1A1A", minHeight: 20, maxHeight: 80, paddingHorizontal: 2 }}
@@ -1145,6 +1178,7 @@ export default function InterviewDetail() {
           <CommentsThread
             comments={comments}
             scrollRef={scrollViewRef}
+            brand={brand}
             onSend={(text) => {
               setComments((prev) => [
                 ...prev,
