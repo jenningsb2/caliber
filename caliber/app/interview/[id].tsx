@@ -14,7 +14,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useBrand } from "../../contexts/brand-context";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActionSheetIOS, Alert, Animated, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActionSheetIOS, Alert, Animated, Keyboard, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import potbellyLogo from "../../assets/images/Potbelly_Sandwich_Shop_logo.png";
 import tacoBellLogo from "../../assets/images/taco_bell_logo.png";
@@ -444,11 +444,14 @@ function renderCommentText(text: string) {
 function CommentsThread({
   comments,
   onSend,
+  scrollRef,
 }: {
   comments: Comment[];
   onSend: (text: string) => void;
+  scrollRef?: React.RefObject<ScrollView | null>;
 }) {
   const [input, setInput] = useState("");
+  const inputRef = useRef<TextInput>(null);
 
   function handleSend() {
     const trimmed = input.trim();
@@ -491,16 +494,18 @@ function CommentsThread({
       {/* Compose */}
       <View style={{ backgroundColor: "#fff", borderRadius: 14, borderCurve: "continuous", paddingHorizontal: 12, paddingTop: 10, paddingBottom: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.06)", gap: 6 }}>
         <TextInput
+          ref={inputRef}
           style={{ fontSize: 14, color: "#1A1A1A", minHeight: 20, maxHeight: 80, paddingHorizontal: 2 }}
           placeholder="Add a comment..."
           placeholderTextColor="#8E8E8E"
           value={input}
           onChangeText={setInput}
           multiline
+          onFocus={() => setTimeout(() => scrollRef?.current?.scrollToEnd({ animated: true }), 300)}
         />
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
           <TouchableOpacity
-            onPress={() => setInput((prev) => prev + "@")}
+            onPress={() => { setInput((prev) => prev + "@"); inputRef.current?.focus(); }}
             activeOpacity={0.7}
             style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#F0F0F0", alignItems: "center", justifyContent: "center" }}
           >
@@ -894,6 +899,14 @@ export default function InterviewDetail() {
   const [comments, setComments] = useState<Comment[]>(() => getMockComments(brand));
   const [showSpeedSheet, setShowSpeedSheet] = useState(false);
   const speedSheetRef = useRef<BottomSheet>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardWillShow", () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener("keyboardWillHide", () => setKeyboardVisible(false));
+    return () => { showSub.remove(); hideSub.remove(); };
+  }, []);
 
   useEffect(() => {
     if (showSpeedSheet) {
@@ -997,14 +1010,16 @@ export default function InterviewDetail() {
       </Stack.Toolbar>
 
       <ScrollView
+        ref={scrollViewRef}
         contentInsetAdjustmentBehavior="automatic"
         automaticallyAdjustKeyboardInsets
         keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         style={{ flex: 1 }}
         contentContainerStyle={{
           padding: 16,
           gap: 16,
-          paddingBottom: isPeek ? 32 : bottomBarHeight,
+          paddingBottom: isPeek ? 32 : activeTab === "Comments" && keyboardVisible ? 16 : bottomBarHeight,
         }}
         showsVerticalScrollIndicator={false}
       >
@@ -1129,6 +1144,7 @@ export default function InterviewDetail() {
         {activeTab === "Comments" && (
           <CommentsThread
             comments={comments}
+            scrollRef={scrollViewRef}
             onSend={(text) => {
               setComments((prev) => [
                 ...prev,
