@@ -477,7 +477,7 @@ function CommentsThread({
                   </Text>
                   {comment.author.role === "admin" && (
                     <View style={{ backgroundColor: "#EDEDFF", borderRadius: 6, borderCurve: "continuous", paddingHorizontal: 6, paddingVertical: 1 }}>
-                      <Text style={{ fontSize: 11, fontWeight: "600", color: "#5B5FC7" }}>HR</Text>
+                      <Text style={{ fontSize: 11, fontWeight: "600", color: "#5B5FC7" }}>Admin</Text>
                     </View>
                   )}
                   <Text style={{ fontSize: 12, color: "#8E8E8E" }}>{comment.time}</Text>
@@ -1155,6 +1155,7 @@ export default function InterviewDetail() {
                   time: "Just now",
                 },
               ]);
+              requestAnimationFrame(() => scrollViewRef.current?.scrollToEnd({ animated: true }));
             }}
           />
         )}
