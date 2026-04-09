@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { GlassView } from "expo-glass-effect";
 import { Stack, useRouter } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ActionSheetIOS, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import potbellyLogo from "../assets/images/Potbelly_Sandwich_Shop_logo.png";
@@ -119,12 +119,13 @@ export default function InterviewsScreen() {
   const [positionFilter, setPositionFilter] = useState<string | null>(null);
   const bottomBarHeight = 52 + insets.bottom + 24;
 
-  const upcoming = getBrandUpcoming(brand);
-  const sections = getBrandSections(brand);
+  const upcoming = useMemo(() => getBrandUpcoming(brand), [brand]);
+  const sections = useMemo(() => getBrandSections(brand), [brand]);
 
-  const allRoles = Array.from(
-    new Set([...upcoming, ...sections.flatMap((s) => s.data)].map((i) => i.role))
-  ).sort();
+  const allRoles = useMemo(
+    () => Array.from(new Set([...upcoming, ...sections.flatMap((s) => s.data)].map((i) => i.role))).sort(),
+    [upcoming, sections]
+  );
 
   function handlePositionFilter() {
     const options = [...allRoles, "Clear filter", "Cancel"];
