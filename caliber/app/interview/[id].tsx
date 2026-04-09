@@ -532,11 +532,11 @@ function AudioPlayer({ uri, speed, onSpeedPress }: { uri: string; speed: number;
   );
 }
 
-function PastBar({ onResume, recordingUri, speed, onSpeedPress }: { onResume: () => void; recordingUri: string | null; speed: number; onSpeedPress: () => void }) {
+function PastBar({ onChat, onResume, recordingUri, speed, onSpeedPress }: { onChat: () => void; onResume: () => void; recordingUri: string | null; speed: number; onSpeedPress: () => void }) {
   return (
     <View style={{ gap: 10 }}>
       <View style={{ flexDirection: "row", gap: 10 }}>
-        <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8}>
+        <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8} onPress={onChat}>
           <GlassView
             colorScheme="dark"
             style={{
@@ -987,7 +987,7 @@ export default function InterviewDetail() {
           {status === "upcoming" && (
             <UpcomingBar onStart={() => setStatus("inprogress")} />
           )}
-          {status === "past" && <PastBar onResume={() => setStatus("inprogress")} recordingUri={recordingUri} speed={speed} onSpeedPress={() => setShowSpeedSheet(true)} />}
+          {status === "past" && <PastBar onChat={() => router.push(`/chat?interviewId=${id}`)} onResume={() => setStatus("inprogress")} recordingUri={recordingUri} speed={speed} onSpeedPress={() => setShowSpeedSheet(true)} />}
           {status === "inprogress" && (
             <InProgressBar
               audioRecorder={audioRecorder}

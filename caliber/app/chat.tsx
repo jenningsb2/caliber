@@ -316,13 +316,7 @@ function renderInline(
 
 // ─── Sub-components ─────────────────────────────────────────────────────────
 
-function ChatHeader({
-  interviewLabel,
-  onNewChat,
-}: {
-  interviewLabel?: string;
-  onNewChat: () => void;
-}) {
+function ChatHeader({ onNewChat }: { onNewChat: () => void }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -335,15 +329,6 @@ function ChatHeader({
       >
         <Ionicons name="chevron-back" size={22} color="#1A1A1A" />
       </TouchableOpacity>
-
-      {interviewLabel && (
-        <View style={styles.headerContextPill}>
-          <Ionicons name="person-outline" size={13} color="#8E8E8E" />
-          <Text style={styles.headerContextText} numberOfLines={1}>
-            {interviewLabel}
-          </Text>
-        </View>
-      )}
 
       <View style={styles.headerRight}>
         <TouchableOpacity
@@ -558,7 +543,7 @@ export default function ChatScreen() {
   }
 
   const scopeLabel = scopedInterview
-    ? scopedInterview.name
+    ? `${scopedInterview.name} \u2014 ${scopedInterview.role}`
     : SCOPE_LABELS[scope];
 
   const placeholder = scopedInterview
@@ -567,10 +552,7 @@ export default function ChatScreen() {
 
   return (
     <View style={styles.screen}>
-      <ChatHeader
-        interviewLabel={scopedInterview ? `${scopedInterview.name} \u2014 ${scopedInterview.role}` : undefined}
-        onNewChat={() => setMessages([])}
-      />
+      <ChatHeader onNewChat={() => setMessages([])} />
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -648,22 +630,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F0F0",
     alignItems: "center",
     justifyContent: "center",
-  },
-  headerContextPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#F0F0F0",
-    borderRadius: 16,
-    borderCurve: "continuous",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    maxWidth: 220,
-  },
-  headerContextText: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#555",
   },
   headerRight: {
     flexDirection: "row",
