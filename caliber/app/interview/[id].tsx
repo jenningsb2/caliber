@@ -1265,7 +1265,7 @@ export default function InterviewDetail() {
         <View
           style={{
             position: "absolute",
-            bottom: insets.bottom + 16,
+            bottom: insets.bottom,
             left: 24,
             right: 24,
           }}
