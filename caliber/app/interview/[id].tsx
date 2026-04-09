@@ -684,7 +684,7 @@ function AudioPlayer({ uri, speed, onSpeedPress }: { uri: string; speed: number;
                     position: "absolute",
                     left: 0,
                     top: 0,
-                    bottom: 0,
+                    bottom: 16,
                     width: barWidth * progress,
                     backgroundColor: "#1A1A1A",
                     borderRadius: 2,
@@ -724,7 +724,9 @@ function AudioPlayer({ uri, speed, onSpeedPress }: { uri: string; speed: number;
             width: 44,
             height: 44,
             borderRadius: 100,
-            backgroundColor: speed !== 1 ? "#2A6B3C" : "#F0F0F0",
+            backgroundColor: speed !== 1 ? "#2A6B3C" : "transparent",
+            borderWidth: speed !== 1 ? 0 : 1,
+            borderColor: "rgba(0,0,0,0.12)",
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -741,27 +743,33 @@ function AudioPlayer({ uri, speed, onSpeedPress }: { uri: string; speed: number;
 function PastBar({ onChat, recordingUri, speed, onSpeedPress }: { onChat: () => void; recordingUri: string | null; speed: number; onSpeedPress: () => void }) {
   return (
     <View style={{ gap: 10 }}>
-      <TouchableOpacity activeOpacity={0.8} onPress={onChat}>
-        <GlassView
-          colorScheme="dark"
-          style={{
-            backgroundColor: "#2A6B3C",
-            borderRadius: 100,
-            height: 52,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            overflow: "hidden",
-          }}
-        >
-          <Ionicons name="sparkles" size={18} color="#fff" />
-          <Text style={{ color: "#fff", fontSize: 15, fontWeight: "600" }}>
-            Chat with Caliber
-          </Text>
+      <GlassView colorScheme="light" style={{ borderRadius: 100, borderCurve: "continuous", padding: 6, overflow: "hidden", backgroundColor: "rgba(255,255,255,0.1)", borderWidth: 0.5, borderColor: "rgba(0,0,0,0.08)" }}>
+        <TouchableOpacity activeOpacity={0.8} onPress={onChat}>
+          <GlassView
+            colorScheme="dark"
+            style={{
+              backgroundColor: "#2A6B3C",
+              borderRadius: 100,
+              height: 52,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              overflow: "hidden",
+            }}
+          >
+            <Ionicons name="sparkles" size={18} color="#fff" />
+            <Text style={{ color: "#fff", fontSize: 15, fontWeight: "600" }}>
+              Chat with Caliber
+            </Text>
+          </GlassView>
+        </TouchableOpacity>
+      </GlassView>
+      {recordingUri != null && (
+        <GlassView colorScheme="light" style={{ borderRadius: 100, borderCurve: "continuous", padding: 6, overflow: "hidden", backgroundColor: "rgba(255,255,255,0.1)", borderWidth: 0.5, borderColor: "rgba(0,0,0,0.08)" }}>
+          <AudioPlayer uri={recordingUri} speed={speed} onSpeedPress={onSpeedPress} />
         </GlassView>
-      </TouchableOpacity>
-      {recordingUri != null && <AudioPlayer uri={recordingUri} speed={speed} onSpeedPress={onSpeedPress} />}
+      )}
     </View>
   );
 }
@@ -880,11 +888,8 @@ function InProgressBar({
           alignItems: "center",
           justifyContent: "center",
           gap: 12,
-          backgroundColor: "rgba(255,255,255,0.85)",
           borderRadius: 100,
           height: 52,
-          borderWidth: 1,
-          borderColor: "rgba(0,0,0,0.08)",
         }}
       >
         <Text style={{ fontSize: 17, fontWeight: "600", color: "#1A1A1A", fontVariant: ["tabular-nums"] }}>
@@ -904,7 +909,7 @@ function InProgressBar({
             alignItems: "center",
             justifyContent: "center",
             overflow: "hidden",
-            backgroundColor: "rgba(255,255,255,0.85)",
+            backgroundColor: "transparent",
             borderWidth: 1,
             borderColor: "rgba(0,0,0,0.12)",
           }}
@@ -1265,15 +1270,16 @@ export default function InterviewDetail() {
         <View
           style={{
             position: "absolute",
-            bottom: insets.bottom,
-            left: 24,
-            right: 24,
+            bottom: 16,
+            left: 16,
+            right: 16,
           }}
         >
+          {status === "past" && <PastBar onChat={() => router.push(`/chat?interviewId=${id}`)} recordingUri={recordingUri} speed={speed} onSpeedPress={() => setShowSpeedSheet(true)} />}
+          <GlassView colorScheme="light" style={{ borderRadius: 32, borderCurve: "continuous", padding: 8, overflow: "hidden", backgroundColor: "rgba(255,255,255,0.1)", borderWidth: 0.5, borderColor: "rgba(0,0,0,0.08)" }}>
           {status === "upcoming" && (
             <UpcomingBar onStart={() => setStatus("inprogress")} />
           )}
-          {status === "past" && <PastBar onChat={() => router.push(`/chat?interviewId=${id}`)} recordingUri={recordingUri} speed={speed} onSpeedPress={() => setShowSpeedSheet(true)} />}
           {status === "inprogress" && (
             <InProgressBar
               audioRecorder={audioRecorder}
@@ -1324,6 +1330,7 @@ export default function InterviewDetail() {
               }}
             />
           )}
+          </GlassView>
         </View>
       )}
 

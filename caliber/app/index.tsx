@@ -223,23 +223,25 @@ export default function InterviewsScreen() {
       </ScrollView>
 
       {/* Floating action bar */}
-      <View style={[styles.fab, { bottom: insets.bottom + 16 }]}>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => router.push("/dialer")}>
-          <GlassView colorScheme="dark" style={styles.fabPhone}>
-            <Ionicons name="call" size={20} color="#fff" />
-          </GlassView>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.fabChat} activeOpacity={0.8} onPress={() => router.push("/chat")}>
-          <GlassView colorScheme="dark" style={styles.fabChatGlass}>
-            <Ionicons name="sparkles" size={18} color="#fff" />
-            <Text style={styles.fabChatText}>Chat with Caliber</Text>
-          </GlassView>
-        </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => router.push("/interview/new?status=inprogress")}>
-          <GlassView colorScheme="dark" style={styles.fabMic}>
-            <Ionicons name="mic" size={20} color="#fff" />
-          </GlassView>
-        </TouchableOpacity>
+      <View style={[styles.fab, { bottom: 16 }]}>
+        <GlassView colorScheme="light" style={styles.fabGlass}>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => router.push("/dialer")}>
+            <GlassView colorScheme="dark" style={styles.fabPhone}>
+              <Ionicons name="call" size={20} color="#fff" />
+            </GlassView>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.fabChat} activeOpacity={0.8} onPress={() => router.push("/chat")}>
+            <GlassView colorScheme="dark" style={styles.fabChatGlass}>
+              <Ionicons name="sparkles" size={18} color="#fff" />
+              <Text style={styles.fabChatText}>Chat with Caliber</Text>
+            </GlassView>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => router.push("/interview/new?status=inprogress")}>
+            <GlassView colorScheme="dark" style={styles.fabMic}>
+              <Ionicons name="mic" size={20} color="#fff" />
+            </GlassView>
+          </TouchableOpacity>
+        </GlassView>
       </View>
     </>
   );
@@ -476,11 +478,20 @@ const styles = StyleSheet.create({
   // FAB
   fab: {
     position: "absolute",
-    left: 24,
-    right: 24,
+    left: 16,
+    right: 16,
+  },
+  fabGlass: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    borderRadius: 100,
+    borderCurve: "continuous",
+    padding: 6,
+    overflow: "hidden",
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderWidth: 0.5,
+    borderColor: "rgba(0,0,0,0.08)",
   },
   fabPhone: {
     backgroundColor: "rgba(0,0,0,0.75)",
