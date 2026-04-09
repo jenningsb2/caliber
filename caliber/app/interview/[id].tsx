@@ -718,10 +718,12 @@ function InProgressBar({
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
 export default function InterviewDetail() {
-  const { id, status: statusParam } = useLocalSearchParams<{
+  const { id, status: statusParam, peek } = useLocalSearchParams<{
     id: string;
     status: InterviewStatus;
+    peek?: string;
   }>();
+  const isPeek = peek === "1";
 
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -817,6 +819,9 @@ export default function InterviewDetail() {
 
       <Stack.Toolbar placement="right">
         <Stack.Toolbar.Menu icon="ellipsis">
+          <Stack.Toolbar.MenuAction icon="bubble.left" onPress={() => router.push(`/chat?interviewId=${id}`)}>
+            Chat with Caliber
+          </Stack.Toolbar.MenuAction>
           <Stack.Toolbar.MenuAction icon="square.and.arrow.up" onPress={() => Alert.alert("Share summary", "Coming soon")}>
             Share summary
           </Stack.Toolbar.MenuAction>
@@ -844,7 +849,7 @@ export default function InterviewDetail() {
         contentContainerStyle={{
           padding: 16,
           gap: 16,
-          paddingBottom: bottomBarHeight,
+          paddingBottom: isPeek ? 32 : bottomBarHeight,
         }}
         showsVerticalScrollIndicator={false}
       >
@@ -970,27 +975,29 @@ export default function InterviewDetail() {
       </ScrollView>
 
       {/* Floating action bar */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: insets.bottom + 16,
-          left: 24,
-          right: 24,
-        }}
-      >
-        {status === "upcoming" && (
-          <UpcomingBar onStart={() => setStatus("inprogress")} />
-        )}
-        {status === "past" && <PastBar onResume={() => setStatus("inprogress")} recordingUri={recordingUri} speed={speed} onSpeedPress={() => setShowSpeedSheet(true)} />}
-        {status === "inprogress" && (
-          <InProgressBar
-            audioRecorder={audioRecorder}
-            recorderState={recorderState}
-            onRecorderStateChange={setRecorderState}
-            onEnd={(uri) => { setRecordingUri(uri); setStatus("past"); }}
-          />
-        )}
-      </View>
+      {!isPeek && (
+        <View
+          style={{
+            position: "absolute",
+            bottom: insets.bottom + 16,
+            left: 24,
+            right: 24,
+          }}
+        >
+          {status === "upcoming" && (
+            <UpcomingBar onStart={() => setStatus("inprogress")} />
+          )}
+          {status === "past" && <PastBar onResume={() => setStatus("inprogress")} recordingUri={recordingUri} speed={speed} onSpeedPress={() => setShowSpeedSheet(true)} />}
+          {status === "inprogress" && (
+            <InProgressBar
+              audioRecorder={audioRecorder}
+              recorderState={recorderState}
+              onRecorderStateChange={setRecorderState}
+              onEnd={(uri) => { setRecordingUri(uri); setStatus("past"); }}
+            />
+          )}
+        </View>
+      )}
 
       {/* Toast */}
       {toastVisible && (

@@ -24,6 +24,22 @@ export default function RootLayout() {
         <Stack.Screen name="dialer" options={{ presentation: "modal" }} />
         <Stack.Screen name="profile" options={{ presentation: "modal" }} />
         <Stack.Screen name="interview/edit" options={{ presentation: "modal" }} />
+        <Stack.Screen
+          name="chat"
+          options={{
+            headerShown: false,
+            presentation: "modal",
+            gestureDirection: "vertical",
+          }}
+        />
+        <Stack.Screen
+          name="chat-history"
+          options={{
+            headerShown: false,
+            presentation: "modal",
+            gestureDirection: "vertical",
+          }}
+        />
       </Stack>
     </BrandProvider>
     </GestureHandlerRootView>

@@ -224,6 +224,11 @@ export default function InterviewsScreen() {
 
       {/* Floating action bar */}
       <View style={[styles.fab, { bottom: insets.bottom + 16 }]}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => router.push("/chat")}>
+          <GlassView colorScheme="dark" style={styles.fabChat}>
+            <Ionicons name="sparkles" size={20} color="#fff" />
+          </GlassView>
+        </TouchableOpacity>
         <TouchableOpacity activeOpacity={0.8} onPress={() => router.push("/dialer")}>
           <GlassView colorScheme="dark" style={styles.fabPhone}>
             <Ionicons name="call" size={20} color="#fff" />
@@ -476,6 +481,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+  },
+  fabChat: {
+    backgroundColor: "#2A6B3C",
+    borderRadius: 100,
+    width: 52,
+    height: 52,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
   },
   fabPhone: {
     backgroundColor: "#2A6B3C",
