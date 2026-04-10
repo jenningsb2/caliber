@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, findNodeHandle, ScrollView, Text, TextInput, TouchableOpacity, UIManager, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getBrandRoleTemplates, type ScoringCriterion } from "../../constants/mock-data";
 import { useBrand } from "../../contexts/brand-context";
@@ -39,12 +39,12 @@ function CriterionForm({
   initial,
   onSave,
   onCancel,
-  scrollRef,
+  onInputFocus,
 }: {
   initial?: Partial<ScoringCriterion>;
   onSave: (c: Omit<ScoringCriterion, "id">) => void;
   onCancel: () => void;
-  scrollRef?: React.RefObject<ScrollView>;
+  onInputFocus?: (e: { nativeEvent: { target: number } }) => void;
 }) {
   const [label, setLabel] = useState(initial?.label ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
@@ -67,7 +67,7 @@ function CriterionForm({
         placeholderTextColor="#B0B0B0"
         value={label}
         onChangeText={setLabel}
-        onFocus={() => setTimeout(() => scrollRef?.current?.scrollToEnd({ animated: true }), 300)}
+        onFocus={onInputFocus}
         style={{ fontSize: 15, color: "#1A1A1A", fontWeight: "600" }}
       />
       <View style={{ height: 0.5, backgroundColor: "rgba(0,0,0,0.08)" }} />
@@ -77,7 +77,7 @@ function CriterionForm({
         value={description}
         onChangeText={setDescription}
         multiline
-        onFocus={() => setTimeout(() => scrollRef?.current?.scrollToEnd({ animated: true }), 300)}
+        onFocus={onInputFocus}
         style={{ fontSize: 14, color: "#3A3A3A", lineHeight: 20, minHeight: 56 }}
       />
       <View style={{ flexDirection: "row", gap: 8, marginTop: 2 }}>
@@ -107,6 +107,21 @@ export default function PositionDetailScreen() {
   const { brand } = useBrand();
 
   const scrollViewRef = useRef<ScrollView>(null);
+  const scrollOffsetRef = useRef(0);
+
+  function scrollToInput(e: { nativeEvent: { target: number } }) {
+    const tag = e.nativeEvent.target;
+    const scrollTag = findNodeHandle(scrollViewRef.current);
+    if (tag == null || scrollTag == null) return;
+    setTimeout(() => {
+      UIManager.measureInWindow(tag, (_ix, inputScreenY) => {
+        UIManager.measureInWindow(scrollTag, (_sx, scrollScreenY) => {
+          const relativeY = inputScreenY - scrollScreenY + scrollOffsetRef.current;
+          scrollViewRef.current?.scrollTo({ y: Math.max(0, relativeY - 80), animated: true });
+        });
+      });
+    }, 300);
+  }
   const decoded = decodeURIComponent(roleParam ?? "");
   const template = getBrandRoleTemplates(brand).find((t) => t.role === decoded);
 
@@ -183,6 +198,8 @@ export default function PositionDetailScreen() {
         style={{ flex: 1 }}
         contentContainerStyle={{ padding: 16, gap: 20, paddingBottom: insets.bottom + 32 }}
         showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={(e) => { scrollOffsetRef.current = e.nativeEvent.contentOffset.y; }}
       >
         {/* AI-generated banner */}
         {generatedData && (
@@ -232,7 +249,7 @@ export default function PositionDetailScreen() {
                       initial={criterion}
                       onSave={(c) => handleEditCriterion(criterion.id, c)}
                       onCancel={() => setEditingId(null)}
-                      scrollRef={scrollViewRef}
+                      onInputFocus={scrollToInput}
                     />
                   </View>
                 ) : (
@@ -253,7 +270,7 @@ export default function PositionDetailScreen() {
                 <CriterionForm
                   onSave={handleAddCriterion}
                   onCancel={() => setAddingCriterion(false)}
-                  scrollRef={scrollViewRef}
+                  onInputFocus={scrollToInput}
                 />
               </View>
             )}
@@ -303,7 +320,7 @@ export default function PositionDetailScreen() {
                   onChangeText={setNewPrompt}
                   multiline
                   autoFocus
-                  onFocus={() => setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 300)}
+                  onFocus={scrollToInput}
                   style={{ fontSize: 14, color: "#1A1A1A", lineHeight: 20, minHeight: 44 }}
                 />
                 <View style={{ flexDirection: "row", gap: 8 }}>
