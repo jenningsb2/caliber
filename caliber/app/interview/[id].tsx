@@ -933,6 +933,13 @@ export default function InterviewDetail() {
 
   const isNew = id === "new";
   const router = useRouter();
+
+  function formatPhone(raw: string): string {
+    const digits = raw.replace(/\D/g, "").slice(0, 10);
+    if (digits.length <= 3) return digits.length ? `(${digits}` : "";
+    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
   const insets = useSafeAreaInsets();
   const { brand } = useBrand();
   const interviewMap = useMemo(() => getBrandInterviewMap(brand), [brand]);
@@ -948,6 +955,12 @@ export default function InterviewDetail() {
   const [editRole, setEditRole] = useState(interview?.role ?? roleTemplates[0]?.role ?? "");
   const [editPhone, setEditPhone] = useState(interview?.phone ?? "");
   const [editEmail, setEditEmail] = useState(interview?.email ?? "");
+  const [editingPhone, setEditingPhone] = useState(false);
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [phoneInvalid, setPhoneInvalid] = useState(false);
+  const [emailInvalid, setEmailInvalid] = useState(false);
+  const phoneRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
   const [draftScores, setDraftScores] = useState<CriterionScore[] | null>(null);
   const [draftFeedback, setDraftFeedback] = useState<import("../../constants/mock-data").InterviewFeedback | null>(null);
   const [draftSummary, setDraftSummary] = useState<import("../../constants/mock-data").AISummary | null>(null);
@@ -984,10 +997,14 @@ export default function InterviewDetail() {
   const toastY = useRef(new Animated.Value(100)).current;
   const toastOpacity = useRef(new Animated.Value(1)).current;
   const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("Copied to clipboard");
+  const [toastIcon, setToastIcon] = useState<keyof typeof Ionicons.glyphMap>("copy-outline");
 
-  function showToast() {
+  function showToast(message = "Copied to clipboard", icon: keyof typeof Ionicons.glyphMap = "copy-outline") {
+    setToastMessage(message);
+    setToastIcon(icon);
     setToastVisible(true);
-    toastY.setValue(100);
+    toastY.setValue(-100);
     toastOpacity.setValue(1);
     Animated.sequence([
       Animated.spring(toastY, { toValue: 0, useNativeDriver: true, bounciness: 8, speed: 14 }),
@@ -1097,10 +1114,11 @@ export default function InterviewDetail() {
             placeholderTextColor="#C0C0C0"
           />
           <View style={{ flexDirection: "row", gap: 12, flexWrap: "wrap" }}>
-            {editPhone ? (
+            {editPhone && !editingPhone ? (
               <TouchableOpacity
                 activeOpacity={0.7}
-                onPress={() => Linking.openURL(`tel:${editPhone}`).catch(() => {})}
+                onPress={() => setEditingPhone(true)}
+                onLongPress={() => Linking.openURL(`tel:${editPhone.replace(/\D/g, "")}`).catch(() => {})}
                 style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
               >
                 <Ionicons name="call-outline" size={14} color="#2A6B3C" />
@@ -1108,21 +1126,34 @@ export default function InterviewDetail() {
               </TouchableOpacity>
             ) : (
               <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-                <Ionicons name="call-outline" size={14} color="#C0C0C0" />
+                <Ionicons name="call-outline" size={14} color={phoneInvalid ? "#FF3B30" : editingPhone ? "#2A6B3C" : "#C0C0C0"} />
                 <TextInput
-                  style={{ fontSize: 13, color: "#1A1A1A", fontWeight: "500", padding: 0, minWidth: 80 }}
+                  ref={phoneRef}
+                  style={{ fontSize: 13, color: phoneInvalid ? "#FF3B30" : "#1A1A1A", fontWeight: "500", padding: 0, minWidth: 80 }}
                   placeholder="Add phone"
                   placeholderTextColor="#C0C0C0"
                   value={editPhone}
-                  onChangeText={setEditPhone}
+                  onChangeText={(text) => { setPhoneInvalid(false); setEditPhone(formatPhone(text)); }}
                   keyboardType="phone-pad"
+                  maxLength={14}
+                  autoFocus={editingPhone}
+                  onFocus={() => setEditingPhone(true)}
+                  onBlur={() => {
+                    if (editPhone && editPhone.replace(/\D/g, "").length !== 10) {
+                      setEditPhone("");
+                      showToast("Please enter a valid phone number", "alert-circle-outline");
+                    }
+                    setPhoneInvalid(false);
+                    setEditingPhone(false);
+                  }}
                 />
               </View>
             )}
-            {editEmail ? (
+            {editEmail && !editingEmail ? (
               <TouchableOpacity
                 activeOpacity={0.7}
-                onPress={() => Linking.openURL(`mailto:${editEmail}`).catch(() => {})}
+                onPress={() => setEditingEmail(true)}
+                onLongPress={() => Linking.openURL(`mailto:${editEmail}`).catch(() => {})}
                 style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
               >
                 <Ionicons name="mail-outline" size={14} color="#2A6B3C" />
@@ -1130,15 +1161,26 @@ export default function InterviewDetail() {
               </TouchableOpacity>
             ) : (
               <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-                <Ionicons name="mail-outline" size={14} color="#C0C0C0" />
+                <Ionicons name="mail-outline" size={14} color={emailInvalid ? "#FF3B30" : editingEmail ? "#2A6B3C" : "#C0C0C0"} />
                 <TextInput
-                  style={{ fontSize: 13, color: "#1A1A1A", fontWeight: "500", padding: 0, minWidth: 80 }}
+                  ref={emailRef}
+                  style={{ fontSize: 13, color: emailInvalid ? "#FF3B30" : "#1A1A1A", fontWeight: "500", padding: 0, minWidth: 80 }}
                   placeholder="Add email"
                   placeholderTextColor="#C0C0C0"
                   value={editEmail}
-                  onChangeText={setEditEmail}
+                  onChangeText={(text) => { setEmailInvalid(false); setEditEmail(text); }}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  autoFocus={editingEmail}
+                  onFocus={() => setEditingEmail(true)}
+                  onBlur={() => {
+                    if (editEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail)) {
+                      setEditEmail("");
+                      showToast("Please enter a valid email address", "alert-circle-outline");
+                    }
+                    setEmailInvalid(false);
+                    setEditingEmail(false);
+                  }}
                 />
               </View>
             )}
@@ -1393,7 +1435,7 @@ export default function InterviewDetail() {
           pointerEvents="none"
           style={{
             position: "absolute",
-            bottom: insets.bottom + 90,
+            top: insets.top + 8,
             alignSelf: "center",
             transform: [{ translateY: toastY }],
             opacity: toastOpacity,
@@ -1407,9 +1449,9 @@ export default function InterviewDetail() {
             boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
           }}
         >
-          <Ionicons name="copy-outline" size={22} color="#fff" />
+          <Ionicons name={toastIcon} size={22} color="#fff" />
           <View>
-            <Text style={{ fontSize: 15, fontWeight: "600", color: "#fff" }}>Copied to clipboard</Text>
+            <Text style={{ fontSize: 15, fontWeight: "600", color: "#fff" }}>{toastMessage}</Text>
           </View>
         </Animated.View>
       )}
