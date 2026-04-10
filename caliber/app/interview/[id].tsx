@@ -1177,8 +1177,8 @@ export default function InterviewDetail() {
                 onLongPress={() => Linking.openURL(`tel:${editPhone.replace(/\D/g, "")}`).catch(() => {})}
                 style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
               >
-                <Ionicons name="call-outline" size={14} color="#2A6B3C" />
-                <Text style={{ fontSize: 13, color: "#2A6B3C", fontWeight: "500" }}>{editPhone}</Text>
+                <Ionicons name="call-outline" size={14} color="#8E8E8E" />
+                <Text style={{ fontSize: 13, color: "#555", fontWeight: "500" }}>{editPhone}</Text>
               </TouchableOpacity>
             ) : (
               <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
@@ -1212,8 +1212,8 @@ export default function InterviewDetail() {
                 onLongPress={() => Linking.openURL(`mailto:${editEmail}`).catch(() => {})}
                 style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
               >
-                <Ionicons name="mail-outline" size={14} color="#2A6B3C" />
-                <Text style={{ fontSize: 13, color: "#2A6B3C", fontWeight: "500" }}>{editEmail}</Text>
+                <Ionicons name="mail-outline" size={14} color="#8E8E8E" />
+                <Text style={{ fontSize: 13, color: "#555", fontWeight: "500" }}>{editEmail}</Text>
               </TouchableOpacity>
             ) : (
               <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
