@@ -408,8 +408,29 @@ type Comment = {
   time: string;
 };
 
-function getMockComments(brand: string): Comment[] {
+const INTERVIEWER_COLORS: Record<string, string> = {
+  "Bailey Jennings": "#2A6B3C",
+  "Maria Santos": "#D4742C",
+  "Terrence Blake": "#8B5CF6",
+  "Ashley Kim": "#EC4899",
+  "Darnell Price": "#D4742C",
+  "Jenna Liu": "#8B5CF6",
+  "Marco Ruiz": "#EC4899",
+};
+
+function interviewerToAuthor(name: string): CommentAuthor {
+  const [first, last] = name.split(" ");
+  return {
+    name,
+    initials: `${first[0]}${last?.[0] ?? ""}`,
+    role: "interviewer",
+    color: INTERVIEWER_COLORS[name] ?? "#8E8E8E",
+  };
+}
+
+function getMockComments(brand: string, interviewer?: CommentAuthor): Comment[] {
   const admin = ADMIN_BY_BRAND[brand] ?? ADMIN_BY_BRAND.potbelly;
+  const mgr = interviewer ?? ME;
   return [
     {
       id: "c1",
@@ -419,7 +440,7 @@ function getMockComments(brand: string): Comment[] {
     },
     {
       id: "c2",
-      author: ME,
+      author: mgr,
       text: "Thanks! I almost let the scheduling question slide but circled back. Still didn\u2019t pin down Sunday availability though.",
       time: "Sun, 3:22 PM",
     },
@@ -431,14 +452,14 @@ function getMockComments(brand: string): Comment[] {
     },
     {
       id: "c4",
-      author: ME,
+      author: mgr,
       text: `@${admin.name} will do \u2014 I\u2019ll reach out tomorrow and report back.`,
       time: "Sun, 3:35 PM",
     },
     {
       id: "c5",
       author: admin,
-      text: "Perfect. One more thing \u2014 next time try to ask about their long-term goals earlier in the conversation. He brought it up at the end but it would\u2019ve helped shape your questions throughout. Overall though, really strong interview @BJ.",
+      text: `Perfect. One more thing \u2014 next time try to ask about their long-term goals earlier in the conversation. He brought it up at the end but it would\u2019ve helped shape your questions throughout. Overall though, really strong interview @${mgr.name}.`,
       time: "Sun, 3:42 PM",
     },
   ];
@@ -465,16 +486,18 @@ function CommentsThread({
   scrollRef,
   brand,
   highlightCommentId,
+  mentionTarget,
 }: {
   comments: Comment[];
   onSend: (text: string) => void;
   scrollRef?: React.RefObject<ScrollView | null>;
   brand: string;
   highlightCommentId?: string;
+  mentionTarget?: CommentAuthor;
 }) {
   const [input, setInput] = useState("");
   const inputRef = useRef<TextInput>(null);
-  const admin = ADMIN_BY_BRAND[brand] ?? ADMIN_BY_BRAND.potbelly;
+  const target = mentionTarget ?? (ADMIN_BY_BRAND[brand] ?? ADMIN_BY_BRAND.potbelly);
   const highlightAnim = useRef(new Animated.Value(highlightCommentId ? 1 : 0)).current;
   const commentYRef = useRef<Record<string, number>>({});
   const cardYRef = useRef(0);
@@ -504,11 +527,11 @@ function CommentsThread({
   const mentionQuery = mentionMatch ? mentionMatch[1].toLowerCase() : null;
   const showSuggestion =
     mentionQuery !== null &&
-    admin.name.toLowerCase().startsWith(mentionQuery || "");
+    target.name.toLowerCase().startsWith(mentionQuery || "");
 
   function handleSelectMention() {
     // Replace the partial @query with the full @Name
-    const newInput = input.replace(/@[A-Za-z]*$/, `@${admin.name} `);
+    const newInput = input.replace(/@[A-Za-z]*$/, `@${target.name} `);
     setInput(newInput);
     inputRef.current?.focus();
   }
@@ -579,12 +602,12 @@ function CommentsThread({
             activeOpacity={0.7}
             style={{ flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#F7F7FF", borderRadius: 10, borderCurve: "continuous", padding: 8 }}
           >
-            <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: admin.color, alignItems: "center", justifyContent: "center" }}>
-              <Text style={{ fontSize: 11, fontWeight: "700", color: "#fff" }}>{admin.initials}</Text>
+            <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: target.color, alignItems: "center", justifyContent: "center" }}>
+              <Text style={{ fontSize: 11, fontWeight: "700", color: "#fff" }}>{target.initials}</Text>
             </View>
-            <Text style={{ fontSize: 14, fontWeight: "500", color: "#1A1A1A" }}>{admin.name}</Text>
-            <View style={{ backgroundColor: "#EDEDFF", borderRadius: 6, borderCurve: "continuous", paddingHorizontal: 6, paddingVertical: 1 }}>
-              <Text style={{ fontSize: 11, fontWeight: "600", color: "#5B5FC7" }}>Admin</Text>
+            <Text style={{ fontSize: 14, fontWeight: "500", color: "#1A1A1A" }}>{target.name}</Text>
+            <View style={{ backgroundColor: target.role === "admin" ? "#EDEDFF" : "#E8F5E9", borderRadius: 6, borderCurve: "continuous", paddingHorizontal: 6, paddingVertical: 1 }}>
+              <Text style={{ fontSize: 11, fontWeight: "600", color: target.role === "admin" ? "#5B5FC7" : "#2A6B3C" }}>{target.role === "admin" ? "Admin" : "Interviewer"}</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -1024,7 +1047,8 @@ export default function InterviewDetail() {
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const [recorderState, setRecorderState] = useState<RecorderState>("idle");
   const [speed, setSpeed] = useState(1);
-  const [comments, setComments] = useState<Comment[]>(() => getMockComments(brand));
+  const interviewerAuthor = interview?.interviewer ? interviewerToAuthor(interview.interviewer) : undefined;
+  const [comments, setComments] = useState<Comment[]>(() => getMockComments(brand, interviewerAuthor));
   const [showSpeedSheet, setShowSpeedSheet] = useState(false);
   const speedSheetRef = useRef<BottomSheet>(null);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -1418,6 +1442,7 @@ export default function InterviewDetail() {
             scrollRef={scrollViewRef}
             brand={brand}
             highlightCommentId={commentIdParam}
+            mentionTarget={isAdmin ? (interviewerAuthor ?? ME) : undefined}
             onSend={(text) => {
               setComments((prev) => [
                 ...prev,
