@@ -150,10 +150,12 @@ export default function SettingsScreen() {
           </View>
         </Section>
 
-        {/* Organization */}
-        <Section title="Organization">
-          <SettingsRow icon="briefcase-outline" label="Positions" onPress={() => router.push("/positions")} />
-        </Section>
+        {/* Organization — admin only */}
+        {isAdmin && (
+          <Section title="Organization">
+            <SettingsRow icon="briefcase-outline" label="Positions" onPress={() => router.push("/positions")} />
+          </Section>
+        )}
 
         {/* Interviews */}
         <Section title="Interviews">
