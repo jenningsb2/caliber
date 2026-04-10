@@ -61,6 +61,8 @@ export default function EditInterviewScreen() {
 
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
+        automaticallyAdjustKeyboardInsets
+        keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         style={{ flex: 1 }}
         contentContainerStyle={{ padding: 16, gap: 24, paddingBottom: insets.bottom + 32 }}
