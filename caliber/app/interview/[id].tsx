@@ -20,6 +20,7 @@ import potbellyLogo from "../../assets/images/Potbelly_Sandwich_Shop_logo.png";
 import tacoBellLogo from "../../assets/images/taco_bell_logo.png";
 import { AnimatedWaveform } from "../../components/animated-waveform";
 import {
+  getBrandAdminInterviewMap,
   getBrandInterviewMap,
   getBrandRoleTemplates,
   InterviewStatus,
@@ -28,6 +29,7 @@ import {
   type CriterionScore,
   type ScoringCriterion,
 } from "../../constants/mock-data";
+import { useRole } from "../../contexts/role-context";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -462,15 +464,40 @@ function CommentsThread({
   onSend,
   scrollRef,
   brand,
+  highlightCommentId,
 }: {
   comments: Comment[];
   onSend: (text: string) => void;
   scrollRef?: React.RefObject<ScrollView | null>;
   brand: string;
+  highlightCommentId?: string;
 }) {
   const [input, setInput] = useState("");
   const inputRef = useRef<TextInput>(null);
   const admin = ADMIN_BY_BRAND[brand] ?? ADMIN_BY_BRAND.potbelly;
+  const highlightAnim = useRef(new Animated.Value(highlightCommentId ? 1 : 0)).current;
+  const commentYRef = useRef<Record<string, number>>({});
+  const cardYRef = useRef(0);
+  const didScroll = useRef(false);
+
+  // Scroll to highlighted comment once we know its position
+  useEffect(() => {
+    if (!highlightCommentId || didScroll.current) return;
+    const timeout = setTimeout(() => {
+      const localY = commentYRef.current[highlightCommentId];
+      if (localY != null && scrollRef?.current) {
+        const absoluteY = cardYRef.current + localY;
+        scrollRef.current.scrollTo({ y: Math.max(0, absoluteY - 80), animated: true });
+        didScroll.current = true;
+        // Fade out highlight after a pause
+        Animated.sequence([
+          Animated.delay(1200),
+          Animated.timing(highlightAnim, { toValue: 0, duration: 600, useNativeDriver: false }),
+        ]).start();
+      }
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [highlightCommentId]);
 
   // Detect @mention in progress: find the last "@" and check if user is mid-typing
   const mentionMatch = input.match(/@([A-Za-z]*)$/);
@@ -495,11 +522,19 @@ function CommentsThread({
 
   return (
     <>
-      <View style={{ backgroundColor: "#fff", borderRadius: 14, borderCurve: "continuous", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-        {comments.map((comment, i) => (
-          <View key={comment.id}>
-            {i > 0 && <View style={{ height: 0.5, backgroundColor: "rgba(0,0,0,0.08)" }} />}
-            <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12, padding: 14 }}>
+      <View
+        style={{ backgroundColor: "#fff", borderRadius: 14, borderCurve: "continuous", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+        onLayout={(e) => { cardYRef.current = e.nativeEvent.layout.y; }}
+      >
+        {comments.map((comment, i) => {
+          const isHighlighted = comment.id === highlightCommentId;
+          const row = (
+            <View
+              style={{ flexDirection: "row", alignItems: "flex-start", gap: 12, padding: 14 }}
+              onLayout={(e) => {
+                if (comment.id) commentYRef.current[comment.id] = e.nativeEvent.layout.y;
+              }}
+            >
               <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: comment.author.color, alignItems: "center", justifyContent: "center" }}>
                 <Text style={{ fontSize: 13, fontWeight: "700", color: "#fff" }}>{comment.author.initials}</Text>
               </View>
@@ -520,8 +555,19 @@ function CommentsThread({
                 </Text>
               </View>
             </View>
-          </View>
-        ))}
+          );
+
+          return (
+            <View key={comment.id}>
+              {i > 0 && <View style={{ height: 0.5, backgroundColor: "rgba(0,0,0,0.08)" }} />}
+              {isHighlighted ? (
+                <Animated.View style={{ backgroundColor: highlightAnim.interpolate({ inputRange: [0, 1], outputRange: ["rgba(42,107,60,0)", "rgba(42,107,60,0.08)"] }) }}>
+                  {row}
+                </Animated.View>
+              ) : row}
+            </View>
+          );
+        })}
       </View>
 
       {/* Compose */}
@@ -924,10 +970,12 @@ function InProgressBar({
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
 export default function InterviewDetail() {
-  const { id, status: statusParam, peek } = useLocalSearchParams<{
+  const { id, status: statusParam, peek, tab: tabParam, commentId: commentIdParam } = useLocalSearchParams<{
     id: string;
     status: InterviewStatus;
     peek?: string;
+    tab?: string;
+    commentId?: string;
   }>();
   const isPeek = peek === "1";
 
@@ -942,11 +990,19 @@ export default function InterviewDetail() {
   }
   const insets = useSafeAreaInsets();
   const { brand } = useBrand();
-  const interviewMap = useMemo(() => getBrandInterviewMap(brand), [brand]);
+  const { role } = useRole();
+  const isAdmin = role === "admin";
+  const interviewMap = useMemo(
+    () => isAdmin ? getBrandAdminInterviewMap(brand) : getBrandInterviewMap(brand),
+    [brand, isAdmin]
+  );
   const roleTemplates = useMemo(() => getBrandRoleTemplates(brand), [brand]);
   const interview = isNew ? null : interviewMap[id];
+  const me: CommentAuthor = isAdmin
+    ? (ADMIN_BY_BRAND[brand] ?? ADMIN_BY_BRAND.potbelly)
+    : ME;
   const [status, setStatus] = useState<InterviewStatus>(statusParam ?? (isNew ? "inprogress" : "upcoming"));
-  const [activeTab, setActiveTab] = useState<Tab>("Summary");
+  const [activeTab, setActiveTab] = useState<Tab>((tabParam as Tab) ?? "Summary");
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
   const [candidateStatus, setCandidateStatus] = useState<CandidateStatus>(
     interview?.candidateStatus ?? "Applied"
@@ -1228,6 +1284,25 @@ export default function InterviewDetail() {
           ) : summaryLoading ? (
             <ScoringPill />
           ) : null}
+          {isAdmin && interview?.interviewer && (() => {
+            const [first, last] = interview.interviewer!.split(" ");
+            const label = `${first} ${last?.[0] ?? ""}.`;
+            const initial = first[0];
+            const color: Record<string, string> = {
+              "Bailey Jennings": "#2A6B3C", "Maria Santos": "#D4742C",
+              "Terrence Blake": "#8B5CF6", "Ashley Kim": "#EC4899",
+              "Darnell Price": "#D4742C", "Jenna Liu": "#8B5CF6", "Marco Ruiz": "#EC4899",
+            };
+            const bg = color[interview.interviewer!] ?? "#8E8E8E";
+            return (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#F0F0F0", borderRadius: 12, borderCurve: "continuous", paddingLeft: 3, paddingRight: 8, paddingVertical: 3, borderWidth: 0.5, borderColor: "rgba(0,0,0,0.06)" }}>
+                <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: bg, alignItems: "center", justifyContent: "center" }}>
+                  <Text style={{ fontSize: 10, fontWeight: "700", color: "#fff" }}>{initial}</Text>
+                </View>
+                <Text style={{ fontSize: 11, fontWeight: "600", color: "#555" }}>{label}</Text>
+              </View>
+            );
+          })()}
         </View>
 
         {/* Tab bar */}
@@ -1342,12 +1417,13 @@ export default function InterviewDetail() {
             comments={comments}
             scrollRef={scrollViewRef}
             brand={brand}
+            highlightCommentId={commentIdParam}
             onSend={(text) => {
               setComments((prev) => [
                 ...prev,
                 {
                   id: `c-${Date.now()}`,
-                  author: ME,
+                  author: me,
                   text,
                   time: "Just now",
                 },

@@ -13,8 +13,9 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { getBrandInterviewMap } from "../constants/mock-data";
+import { getBrandAdminInterviewMap, getBrandInterviewMap } from "../constants/mock-data";
 import { useBrand } from "../contexts/brand-context";
+import { useRole } from "../contexts/role-context";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -55,6 +56,146 @@ const SUGGESTED_SCOPED = [
   "What should I ask in a follow-up?",
   "How does this candidate compare?",
 ];
+
+const SUGGESTED_ADMIN_GENERAL = [
+  "How are my interviewers performing?",
+  "Which location has the most open roles?",
+  "Who needs coaching this week?",
+  "Summarize yesterday's interviews",
+];
+
+const SUGGESTED_ADMIN_SCOPED = [
+  "How did this interviewer do?",
+  "What coaching feedback should I give?",
+  "Compare this to other interviews",
+  "Flag any concerns with technique",
+];
+
+function getAdminMockResponse(question: string, interviewId?: string): ChatMessage {
+  const q = question.toLowerCase();
+
+  if (interviewId) {
+    if (q.includes("interviewer") || q.includes("how did")) {
+      return {
+        id: Date.now().toString(),
+        role: "assistant",
+        thinkingSeconds: 4,
+        content: `Based on the interview scoring and coaching notes, here's how the interviewer performed:
+
+**Strengths:**
+• Asked targeted follow-up questions that uncovered specific examples
+• Maintained a conversational tone while covering all criteria
+• Time management was solid — covered all 5 scoring areas within the allotted time
+
+**Areas for coaching:**
+• Accepted surface-level answers on conflict resolution without pushing for specifics
+• Didn't follow up on scheduling constraints — left availability vague
+• Could improve on probing unverified claims (self-reported metrics)
+
+**Overall:** The interviewer is developing well but needs to be more assertive on follow-up questions, especially around red flags.`,
+      };
+    }
+
+    if (q.includes("coaching") || q.includes("feedback")) {
+      return {
+        id: Date.now().toString(),
+        role: "assistant",
+        thinkingSeconds: 5,
+        content: `Here's suggested coaching feedback for this interview:
+
+**What to reinforce:**
+• The opening was strong — set a comfortable, professional tone
+• Good use of the scoring criteria to structure the conversation
+
+**What to address:**
+• When a candidate gives a vague answer, use "Can you walk me through a specific time?" before moving on
+• Scheduling constraints need concrete answers, not "I think I'm available"
+• Self-reported metrics (on-time rates, customer scores) should always be followed up with "How was that measured?"
+
+**Suggested coaching approach:** Start with the positives, then role-play the follow-up question technique using a real example from this interview.`,
+      };
+    }
+
+    return getScopedResponse(question, interviewId);
+  }
+
+  if (q.includes("interviewer") || q.includes("performing")) {
+    return {
+      id: Date.now().toString(),
+      role: "assistant",
+      thinkingSeconds: 6,
+      content: `Here's a performance snapshot across your interviewers:
+
+**Bailey Jennings** — Lincoln Park
+9 interviews this cycle. Strongest at probing leadership experience and building rapport. Needs work on pinning down scheduling details and pushing back on vague answers. Average candidate score: 19.6/25.
+
+**Maria Santos** — Loop, State St
+3 interviews this cycle. Good at technical role assessment but tends to accept surface-level conflict resolution answers. Average candidate score: 18.7/25.
+
+**Terrence Blake** — Wicker Park
+3 interviews this cycle. Solid all-around technique. Strongest at maintaining professional tone on phone screens. Could probe availability constraints more aggressively. Average candidate score: 18.0/25.
+
+**Ashley Kim** — Loop, State St
+1 interview this cycle. Small sample, but the one interview showed good instincts — was honest about the candidate's limitations in the coaching notes.`,
+    };
+  }
+
+  if (q.includes("coaching") || q.includes("who needs")) {
+    return {
+      id: Date.now().toString(),
+      role: "assistant",
+      thinkingSeconds: 4,
+      content: `Two interviewers would benefit from coaching this week:
+
+**Bailey Jennings** — Left scheduling questions unresolved in 3 of 9 interviews. Recommend coaching on the "pin it down" technique: before ending any scheduling discussion, get a specific day/time commitment or a firm "no."
+
+**Maria Santos** — Accepted vague conflict resolution answers in 2 of 3 interviews. Recommend role-playing the "tell me about a specific time" follow-up technique.
+
+Terrence Blake and Ashley Kim are performing well — no urgent coaching needs.`,
+    };
+  }
+
+  if (q.includes("location") || q.includes("open role")) {
+    return {
+      id: Date.now().toString(),
+      role: "assistant",
+      thinkingSeconds: 3,
+      content: `Here's the breakdown by location:
+
+**Loop — State St** — Most active. 4 interviews scheduled today, 4 completed this week. Hiring for Cashier, Delivery Driver, and Sandwich Associate.
+
+**Lincoln Park** — 4 interviews scheduled today, 5 completed this week. Hiring across all roles, with Shift Lead being the highest priority.
+
+**Wicker Park** — 2 interviews scheduled today, 2 completed this week. Primarily hiring Cashier and Shift Lead.
+
+Loop has the broadest open role coverage. Lincoln Park has the deepest pipeline for Shift Lead specifically.`,
+    };
+  }
+
+  if (q.includes("yesterday") || q.includes("summarize")) {
+    return {
+      id: Date.now().toString(),
+      role: "assistant",
+      thinkingSeconds: 5,
+      content: `Yesterday's interview activity across all locations:
+
+**Completed:** 4 interviews
+• 2 Shift Lead candidates (Lincoln Park, Loop)
+• 1 Cashier candidate (Wicker Park)
+• 1 Delivery Driver (Loop)
+
+**Outcomes:**
+• 1 candidate advanced to Shortlisted (Tanya Mitchell — Cashier, Wicker Park)
+• 2 still in Screening, pending follow-up
+• 1 flagged for limited availability
+
+**Notable:** Maria Santos flagged Jasmine Torres as a fast-track candidate for Sandwich Associate. Consider reviewing before end of week.`,
+    };
+  }
+
+  // Fall through to manager responses for unmatched admin questions
+  return getMockResponse(question);
+}
 
 function getMockResponse(question: string, interviewId?: string, brand?: string): ChatMessage {
   const q = question.toLowerCase();
@@ -480,8 +621,13 @@ export default function ChatScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { brand } = useBrand();
+  const { role } = useRole();
+  const isAdmin = role === "admin";
 
-  const interviewMap = useMemo(() => getBrandInterviewMap(brand), [brand]);
+  const interviewMap = useMemo(
+    () => isAdmin ? getBrandAdminInterviewMap(brand) : getBrandInterviewMap(brand),
+    [brand, isAdmin]
+  );
   const scopedInterview = interviewId ? interviewMap[interviewId] : undefined;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -491,7 +637,9 @@ export default function ChatScreen() {
 
   const scrollRef = useRef<ScrollView>(null);
 
-  const suggestedQuestions = scopedInterview ? SUGGESTED_SCOPED : SUGGESTED_GENERAL;
+  const suggestedQuestions = scopedInterview
+    ? (isAdmin ? SUGGESTED_ADMIN_SCOPED : SUGGESTED_SCOPED)
+    : (isAdmin ? SUGGESTED_ADMIN_GENERAL : SUGGESTED_GENERAL);
   const hasMessages = messages.length > 0;
 
   function handleScopePress() {
@@ -526,7 +674,9 @@ export default function ChatScreen() {
     setIsThinking(true);
 
     // Simulate thinking delay
-    const mockResponse = getMockResponse(content, interviewId, brand);
+    const mockResponse = isAdmin
+      ? getAdminMockResponse(content, interviewId)
+      : getMockResponse(content, interviewId, brand);
     const delay = (mockResponse.thinkingSeconds ?? 2) * 250; // compressed for UX
 
     setTimeout(() => {

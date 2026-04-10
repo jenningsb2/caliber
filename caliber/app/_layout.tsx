@@ -1,11 +1,13 @@
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BrandProvider } from "../contexts/brand-context";
+import { RoleProvider } from "../contexts/role-context";
 
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
     <BrandProvider>
+    <RoleProvider>
       <Stack
         screenOptions={{
           headerLargeTitle: true,
@@ -40,7 +42,9 @@ export default function RootLayout() {
             gestureDirection: "vertical",
           }}
         />
+        <Stack.Screen name="inbox" options={{ presentation: "modal" }} />
       </Stack>
+    </RoleProvider>
     </BrandProvider>
     </GestureHandlerRootView>
   );

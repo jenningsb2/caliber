@@ -2,12 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
-import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import potbellyLogo from "../assets/images/Potbelly_Sandwich_Shop_logo.png";
 import tacoBellLogo from "../assets/images/taco_bell_logo.png";
-import { BRAND_META } from "../constants/mock-data";
+import { ADMIN_META, BRAND_META } from "../constants/mock-data";
 import { useBrand, useToggleBrand } from "../contexts/brand-context";
+import { useRole, type Role } from "../contexts/role-context";
 
 type SettingsRowProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -49,13 +50,44 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+function RoleSwitcher({ role, onSelect }: { role: Role; onSelect: (r: Role) => void }) {
+  const options: { key: Role; label: string }[] = [
+    { key: "manager", label: "Location Manager" },
+    { key: "admin", label: "HR Admin" },
+  ];
+  return (
+    <View style={settingsStyles.roleSwitcher}>
+      {options.map((opt) => {
+        const active = role === opt.key;
+        return (
+          <TouchableOpacity
+            key={opt.key}
+            activeOpacity={0.7}
+            onPress={() => onSelect(opt.key)}
+            style={[settingsStyles.rolePill, active && settingsStyles.rolePillActive]}
+          >
+            <Text style={[settingsStyles.rolePillText, active && settingsStyles.rolePillTextActive]}>
+              {opt.label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+}
+
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [autoSummary, setAutoSummary] = useState(true);
   const { brand } = useBrand();
   const toggleBrand = useToggleBrand();
-  const meta = BRAND_META[brand];
+  const { role, setRole } = useRole();
+  const isAdmin = role === "admin";
+  const adminMeta = ADMIN_META[brand];
+  const meta = isAdmin
+    ? { name: adminMeta.name, email: adminMeta.email }
+    : BRAND_META[brand];
 
   return (
     <>
@@ -111,6 +143,13 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Role switcher */}
+        <Section title="View as">
+          <View style={{ paddingHorizontal: 12, paddingVertical: 10 }}>
+            <RoleSwitcher role={role} onSelect={setRole} />
+          </View>
+        </Section>
+
         {/* Organization */}
         <Section title="Organization">
           <SettingsRow icon="briefcase-outline" label="Positions" onPress={() => router.push("/positions")} />
@@ -149,3 +188,31 @@ export default function SettingsScreen() {
     </>
   );
 }
+
+const settingsStyles = StyleSheet.create({
+  roleSwitcher: {
+    flexDirection: "row",
+    backgroundColor: "#F0F0F0",
+    borderRadius: 10,
+    borderCurve: "continuous",
+    padding: 3,
+  },
+  rolePill: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderCurve: "continuous",
+  },
+  rolePillActive: {
+    backgroundColor: "#2A6B3C",
+  },
+  rolePillText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#8E8E8E",
+  },
+  rolePillTextActive: {
+    color: "#fff",
+  },
+});

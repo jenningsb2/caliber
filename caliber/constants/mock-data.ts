@@ -48,7 +48,8 @@ export interface Interview {
   time: string;
   email?: string;
   phone?: string;
-  rating?: number;
+  interviewer?: string;
+  location?: string;
   score?: { value: number; outOf: number };
   criterionScores?: CriterionScore[];
   interviewerFeedback?: InterviewFeedback;
@@ -131,7 +132,7 @@ export const IONICON: Record<InterviewType, keyof typeof Ionicons.glyphMap> = {
   Video: "videocam-outline",
 };
 
-// Today's scheduled interviews — no ratings yet
+// Today's scheduled interviews
 export const UPCOMING: Interview[] = [
   {
     id: "1",
@@ -143,6 +144,8 @@ export const UPCOMING: Interview[] = [
     time: "10:00 AM",
     email: "jordan.patel@gmail.com",
     phone: "(312) 555-0147",
+    interviewer: "Bailey Jennings",
+    location: "Lincoln Park",
     candidateStatus: "Screening",
   },
   {
@@ -155,6 +158,8 @@ export const UPCOMING: Interview[] = [
     time: "11:15 AM",
     email: "aisha.rahman@gmail.com",
     phone: "(312) 555-0238",
+    interviewer: "Bailey Jennings",
+    location: "Lincoln Park",
     candidateStatus: "Applied",
   },
   {
@@ -167,6 +172,8 @@ export const UPCOMING: Interview[] = [
     time: "1:00 PM",
     email: "devon.carter@yahoo.com",
     phone: "(312) 555-0391",
+    interviewer: "Bailey Jennings",
+    location: "Lincoln Park",
     candidateStatus: "Applied",
   },
   {
@@ -179,11 +186,13 @@ export const UPCOMING: Interview[] = [
     time: "2:30 PM",
     email: "sofia.alvarez@gmail.com",
     phone: "(312) 555-0412",
+    interviewer: "Bailey Jennings",
+    location: "Lincoln Park",
     candidateStatus: "Screening",
   },
 ];
 
-// Past completed interviews — have ratings and AI summaries
+// Past completed interviews
 export const SECTIONS: { title: string; data: Interview[] }[] = [
   {
     title: "Sun Apr 6",
@@ -196,9 +205,11 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         type: "In-person",
         email: "marcus.webb@gmail.com",
         phone: "(312) 555-0519",
+        interviewer: "Bailey Jennings",
+        location: "Lincoln Park",
         date: "Sun",
         time: "10:00 AM",
-        rating: 4.8,
+
         score: { value: 23, outOf: 25 },
         criterionScores: [
           { criterionId: "sl-1", score: 5, note: "5 years food service with direct team leadership at Chipotle and Panera." },
@@ -245,9 +256,11 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         type: "Phone",
         email: "carlos.mendoza@hotmail.com",
         phone: "(312) 555-0623",
+        interviewer: "Bailey Jennings",
+        location: "Lincoln Park",
         date: "Sun",
         time: "11:30 AM",
-        rating: 4.2,
+
         score: { value: 17, outOf: 25 },
         criterionScores: [
           { criterionId: "dd-1", score: 4, note: "Clean record confirmed verbally — no written verification yet." },
@@ -298,9 +311,11 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         type: "Phone",
         email: "priya.nair@gmail.com",
         phone: "(312) 555-0734",
+        interviewer: "Bailey Jennings",
+        location: "Lincoln Park",
         date: "Fri",
         time: "9:30 AM",
-        rating: 4.9,
+
         score: { value: 24, outOf: 25 },
         criterionScores: [
           { criterionId: "ca-1", score: 5, note: "Exceptional customer feedback — 4.9 star average at prior employer." },
@@ -346,9 +361,11 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         type: "In-person",
         email: "james.okafor@gmail.com",
         phone: "(312) 555-0845",
+        interviewer: "Bailey Jennings",
+        location: "Lincoln Park",
         date: "Fri",
         time: "2:00 PM",
-        rating: 4.6,
+
         score: { value: 20, outOf: 25 },
         criterionScores: [
           { criterionId: "sl-1", score: 5, note: "1 year formal shift lead at Subway plus broader QSR background." },
@@ -394,9 +411,11 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         type: "Phone",
         email: "lily.chen@outlook.com",
         phone: "(312) 555-0956",
+        interviewer: "Bailey Jennings",
+        location: "Lincoln Park",
         date: "Fri",
         time: "4:00 PM",
-        rating: 4.7,
+
         score: { value: 21, outOf: 25 },
         criterionScores: [
           { criterionId: "sa-1", score: 5, note: "Deli and Panera experience — comfortable building orders to spec." },
@@ -446,9 +465,11 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         type: "Google Meet",
         email: "tyrese.brown@gmail.com",
         phone: "(312) 555-1067",
+        interviewer: "Bailey Jennings",
+        location: "Lincoln Park",
         date: "Thu",
         time: "11:00 AM",
-        rating: 3.9,
+
         score: { value: 14, outOf: 25 },
         criterionScores: [
           { criterionId: "dd-1", score: 4, note: "Valid license and insurance confirmed. No violations reported." },
@@ -493,9 +514,11 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         type: "Phone",
         email: "fatima.alhassan@gmail.com",
         phone: "(312) 555-1178",
+        interviewer: "Bailey Jennings",
+        location: "Lincoln Park",
         date: "Thu",
         time: "1:30 PM",
-        rating: 4.4,
+
         score: { value: 18, outOf: 25 },
         criterionScores: [
           { criterionId: "ca-1", score: 5, note: "Strong de-escalation experience with frustrated customers." },
@@ -546,9 +569,11 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         type: "In-person",
         email: "noah.reyes@yahoo.com",
         phone: "(312) 555-1289",
+        interviewer: "Bailey Jennings",
+        location: "Lincoln Park",
         date: "Wed",
         time: "10:00 AM",
-        rating: 4.3,
+
         score: { value: 19, outOf: 25 },
         criterionScores: [
           { criterionId: "sl-1", score: 4, note: "Informal lead duties at Taco Bell but no official title." },
@@ -594,9 +619,11 @@ export const SECTIONS: { title: string; data: Interview[] }[] = [
         type: "Phone",
         email: "imani.jackson@gmail.com",
         phone: "(312) 555-1390",
+        interviewer: "Bailey Jennings",
+        location: "Lincoln Park",
         date: "Wed",
         time: "2:15 PM",
-        rating: 4.1,
+
         score: { value: 18, outOf: 25 },
         criterionScores: [
           { criterionId: "sa-1", score: 4, note: "Brief retail background. No direct food prep experience yet." },
@@ -663,3 +690,454 @@ export function getBrandUpcoming(brand: Brand) { return applyBrand(UPCOMING, bra
 export function getBrandSections(brand: Brand) { return applyBrand(SECTIONS, brand); }
 export function getBrandInterviewMap(brand: Brand) { return applyBrand(INTERVIEW_MAP, brand); }
 export function getBrandRoleTemplates(brand: Brand) { return applyBrand(ROLE_TEMPLATES, brand); }
+
+// ─── Role switching ──────────────────────────────────────────────────────────
+
+export type Role = "manager" | "admin";
+
+export const ROLE_META: Record<Role, { title: string; subtitle: string }> = {
+  manager: { title: "Location Manager", subtitle: "My Interviews" },
+  admin: { title: "HR Admin", subtitle: "All Interviews" },
+};
+
+export const ADMIN_META: Record<Brand, { name: string; email: string; initials: string }> = {
+  potbelly: { name: "Brandi Adams", email: "brandi.adams@potbelly.com", initials: "BA" },
+  tacobell: { name: "Ken Guardino", email: "ken.guardino@tacobell.com", initials: "KG" },
+};
+
+export const INTERVIEWERS: Record<Brand, string[]> = {
+  potbelly: ["Bailey Jennings", "Maria Santos", "Terrence Blake", "Ashley Kim"],
+  tacobell: ["Bailey Jennings", "Darnell Price", "Jenna Liu", "Marco Ruiz"],
+};
+
+export const LOCATIONS: Record<Brand, string[]> = {
+  potbelly: ["Lincoln Park", "Loop — State St", "Wicker Park"],
+  tacobell: ["Wrigleyville", "Lakeview", "Logan Square"],
+};
+
+// ─── Admin datasets ──────────────────────────────────────────────────────────
+
+export const ADMIN_UPCOMING: Interview[] = [
+  ...UPCOMING,
+  {
+    id: "a1",
+    name: "Keisha Moore",
+    role: "Cashier",
+    durationMin: 20,
+    type: "Phone",
+    date: "Today",
+    time: "9:30 AM",
+    email: "keisha.moore@gmail.com",
+    phone: "(312) 555-2001",
+    interviewer: "Maria Santos",
+    location: "Loop — State St",
+    candidateStatus: "Applied",
+  },
+  {
+    id: "a2",
+    name: "Ethan Park",
+    role: "Shift Lead",
+    durationMin: 45,
+    type: "In-person",
+    date: "Today",
+    time: "11:00 AM",
+    email: "ethan.park@gmail.com",
+    phone: "(312) 555-2012",
+    interviewer: "Terrence Blake",
+    location: "Wicker Park",
+    candidateStatus: "Screening",
+  },
+  {
+    id: "a3",
+    name: "Daniela Reyes",
+    role: "Sandwich Associate",
+    durationMin: 20,
+    type: "Phone",
+    date: "Today",
+    time: "12:30 PM",
+    email: "daniela.reyes@yahoo.com",
+    phone: "(312) 555-2023",
+    interviewer: "Ashley Kim",
+    location: "Loop — State St",
+    candidateStatus: "Applied",
+  },
+  {
+    id: "a4",
+    name: "Marcus Williams",
+    role: "Delivery Driver",
+    durationMin: 30,
+    type: "Google Meet",
+    date: "Today",
+    time: "3:00 PM",
+    email: "marcus.williams@gmail.com",
+    phone: "(312) 555-2034",
+    interviewer: "Maria Santos",
+    location: "Loop — State St",
+    candidateStatus: "Screening",
+  },
+  {
+    id: "a5",
+    name: "Rachel Nguyen",
+    role: "Cashier",
+    durationMin: 20,
+    type: "In-person",
+    date: "Today",
+    time: "4:15 PM",
+    email: "rachel.nguyen@gmail.com",
+    phone: "(312) 555-2045",
+    interviewer: "Terrence Blake",
+    location: "Wicker Park",
+    candidateStatus: "Applied",
+  },
+];
+
+export const ADMIN_SECTIONS: { title: string; data: Interview[] }[] = [
+  {
+    title: "Sun Apr 6",
+    data: [
+      ...SECTIONS[0].data,
+      {
+        id: "a6",
+        name: "Andre Washington",
+        role: "Shift Lead",
+        durationMin: 45,
+        type: "In-person",
+        email: "andre.washington@gmail.com",
+        phone: "(312) 555-2056",
+        interviewer: "Maria Santos",
+        location: "Loop — State St",
+        date: "Sun",
+        time: "1:00 PM",
+
+        score: { value: 18, outOf: 25 },
+        criterionScores: [
+          { criterionId: "sl-1", score: 4, note: "2 years informal lead at a burger chain. No formal title." },
+          { criterionId: "sl-2", score: 3, note: "Gave one example but it was vague — needed prompting." },
+          { criterionId: "sl-3", score: 4, note: "Familiar with opening duties and basic inventory." },
+          { criterionId: "sl-4", score: 3, note: "No certifications. Willing to obtain." },
+          { criterionId: "sl-5", score: 4, note: "Full availability including weekends." },
+        ],
+        candidateStatus: "Screening",
+        aiSummary: {
+          experienceSnapshot: "2 years at a local burger chain with informal lead duties. No certifications.",
+          keyHighlights: ["Full weekend availability", "Eager to step into a formal leadership role"],
+          communicationFit: "Friendly but answers lacked specifics. Would benefit from structured interview prep.",
+          notedGaps: "No formal leadership title or certifications. Conflict resolution answers were surface-level.",
+          availability: "Full availability, including weekends and holidays.",
+        },
+      },
+      {
+        id: "a7",
+        name: "Tanya Mitchell",
+        role: "Cashier",
+        durationMin: 20,
+        type: "Phone",
+        email: "tanya.mitchell@gmail.com",
+        phone: "(312) 555-2067",
+        interviewer: "Terrence Blake",
+        location: "Wicker Park",
+        date: "Sun",
+        time: "3:30 PM",
+
+        score: { value: 21, outOf: 25 },
+        criterionScores: [
+          { criterionId: "ca-1", score: 5, note: "3 years retail with strong customer reviews." },
+          { criterionId: "ca-2", score: 4, note: "Comfortable with POS, no formal cash handling role." },
+          { criterionId: "ca-3", score: 4, note: "High volume experience at a busy retail store." },
+          { criterionId: "ca-4", score: 4, note: "Clear communicator, slightly reserved on the phone." },
+          { criterionId: "ca-5", score: 4, note: "Mon–Sat, prefers mornings." },
+        ],
+        candidateStatus: "Shortlisted",
+        aiSummary: {
+          experienceSnapshot: "3 years retail cashier at a department store. Strong customer service background.",
+          keyHighlights: ["Consistent customer reviews", "Quick POS learner", "Available 6 days/week"],
+          communicationFit: "Professional and measured. Slightly reserved on the phone but likely stronger in person.",
+          notedGaps: "No food service background. Would need food safety orientation.",
+          availability: "Mon–Sat, morning preference.",
+        },
+      },
+    ],
+  },
+  {
+    title: "Fri Apr 4",
+    data: [
+      ...SECTIONS[1].data,
+      {
+        id: "a8",
+        name: "Derek Johnson",
+        role: "Delivery Driver",
+        durationMin: 30,
+        type: "Phone",
+        email: "derek.johnson@hotmail.com",
+        phone: "(312) 555-2078",
+        interviewer: "Ashley Kim",
+        location: "Loop — State St",
+        date: "Fri",
+        time: "11:00 AM",
+
+        score: { value: 15, outOf: 25 },
+        criterionScores: [
+          { criterionId: "dd-1", score: 4, note: "Clean record, valid license." },
+          { criterionId: "dd-2", score: 3, note: "New to the area — relies on GPS heavily." },
+          { criterionId: "dd-3", score: 3, note: "Older vehicle but maintained well." },
+          { criterionId: "dd-4", score: 3, note: "Self-reported on-time rate, no documentation." },
+          { criterionId: "dd-5", score: 2, note: "Only available weekday afternoons." },
+        ],
+        candidateStatus: "Screening",
+        aiSummary: {
+          experienceSnapshot: "6 months DoorDash. New to in-house delivery roles.",
+          keyHighlights: ["Clean driving record", "Motivated to transition from gig work"],
+          communicationFit: "Honest about limitations. Kept answers short but direct.",
+          notedGaps: "Limited area knowledge and narrow availability window.",
+          availability: "Weekday afternoons only, 12–6 PM.",
+        },
+      },
+    ],
+  },
+  {
+    title: "Thu Apr 3",
+    data: [
+      ...SECTIONS[2].data,
+      {
+        id: "a9",
+        name: "Jasmine Torres",
+        role: "Sandwich Associate",
+        durationMin: 20,
+        type: "In-person",
+        email: "jasmine.torres@gmail.com",
+        phone: "(312) 555-2089",
+        interviewer: "Maria Santos",
+        location: "Loop — State St",
+        date: "Thu",
+        time: "3:00 PM",
+
+        score: { value: 22, outOf: 25 },
+        criterionScores: [
+          { criterionId: "sa-1", score: 5, note: "2 years deli experience. Builds orders quickly and accurately." },
+          { criterionId: "sa-2", score: 5, note: "Handled lunch rushes at a busy downtown deli." },
+          { criterionId: "sa-3", score: 4, note: "Good attention to detail, mentioned dietary accommodation experience." },
+          { criterionId: "sa-4", score: 4, note: "No physical concerns raised." },
+          { criterionId: "sa-5", score: 4, note: "Available 5 days/week, flexible on which days." },
+        ],
+        candidateStatus: "Shortlisted",
+        aiSummary: {
+          experienceSnapshot: "2 years at a downtown deli. Strong food prep and rush-hour experience.",
+          keyHighlights: ["Fast and accurate order building", "Dietary accommodation experience", "Flexible 5-day availability"],
+          communicationFit: "Confident and detailed. Gave specific examples without prompting.",
+          notedGaps: "No Potbelly-specific experience but strong transferable skills.",
+          availability: "5 days/week, flexible scheduling.",
+        },
+      },
+    ],
+  },
+  {
+    title: "Wed Apr 2",
+    data: [
+      ...SECTIONS[3].data,
+      {
+        id: "a10",
+        name: "Brandon Lewis",
+        role: "Shift Lead",
+        durationMin: 45,
+        type: "Google Meet",
+        email: "brandon.lewis@gmail.com",
+        phone: "(312) 555-2090",
+        interviewer: "Terrence Blake",
+        location: "Wicker Park",
+        date: "Wed",
+        time: "11:30 AM",
+
+        score: { value: 17, outOf: 25 },
+        criterionScores: [
+          { criterionId: "sl-1", score: 3, note: "1 year crew member, no lead experience." },
+          { criterionId: "sl-2", score: 3, note: "Limited conflict examples but showed potential." },
+          { criterionId: "sl-3", score: 4, note: "Familiar with closing duties and basic scheduling." },
+          { criterionId: "sl-4", score: 3, note: "Food handler cert only. Needs ServSafe." },
+          { criterionId: "sl-5", score: 4, note: "Open availability including weekends." },
+        ],
+        candidateStatus: "Screening",
+        aiSummary: {
+          experienceSnapshot: "1 year crew member at a pizza chain. Looking to step into leadership.",
+          keyHighlights: ["Full availability including weekends", "Familiar with closing procedures"],
+          communicationFit: "Eager but green. Needs more polish in structured interview settings.",
+          notedGaps: "No formal lead experience. Would need mentorship to succeed in the role.",
+          availability: "Full availability, very flexible.",
+        },
+      },
+    ],
+  },
+];
+
+export const ADMIN_INTERVIEW_MAP: Record<string, Interview> = Object.fromEntries(
+  [...ADMIN_UPCOMING, ...ADMIN_SECTIONS.flatMap((s) => s.data)].map((i) => [i.id, i])
+);
+
+export function getBrandAdminUpcoming(brand: Brand) { return applyBrand(ADMIN_UPCOMING, brand); }
+export function getBrandAdminSections(brand: Brand) { return applyBrand(ADMIN_SECTIONS, brand); }
+export function getBrandAdminInterviewMap(brand: Brand) { return applyBrand(ADMIN_INTERVIEW_MAP, brand); }
+
+// ─── Inbox ───────────────────────────────────────────────────────────────────
+
+export interface InboxItem {
+  id: string;
+  interviewId: string;
+  commentId: string;
+  candidateName: string;
+  candidateRole: string;
+  interviewer: string;
+  lastComment: string;
+  lastCommentAuthor: string;
+  lastCommentAuthorInitials: string;
+  lastCommentAuthorColor: string;
+  time: string;
+  unread: boolean;
+  replied: boolean;
+}
+
+// Manager sees coaching comments from admin on their interviews
+export const MANAGER_INBOX_ITEMS: InboxItem[] = [
+  {
+    id: "mi1",
+    interviewId: "5",
+    commentId: "c5",
+    candidateName: "Marcus Webb",
+    candidateRole: "Shift Lead",
+    interviewer: "Bailey Jennings",
+    lastComment: "Nice work on this one. The conflict resolution probing was solid — you got a specific example without leading him.",
+    lastCommentAuthor: "Brandi Adams",
+    lastCommentAuthorInitials: "BA",
+    lastCommentAuthorColor: "#5B5FC7",
+    time: "Sun, 3:42 PM",
+    unread: false,
+    replied: true,
+  },
+  {
+    id: "mi2",
+    interviewId: "8",
+    commentId: "c3",
+    candidateName: "James Okafor",
+    candidateRole: "Shift Lead",
+    interviewer: "Bailey Jennings",
+    lastComment: "You let him off easy on the conflict question. Next time, push for a specific example before accepting a general answer.",
+    lastCommentAuthor: "Brandi Adams",
+    lastCommentAuthorInitials: "BA",
+    lastCommentAuthorColor: "#5B5FC7",
+    time: "Fri, 3:10 PM",
+    unread: true,
+    replied: false,
+  },
+  {
+    id: "mi3",
+    interviewId: "10",
+    commentId: "c3",
+    candidateName: "Tyrese Brown",
+    candidateRole: "Delivery Driver",
+    interviewer: "Bailey Jennings",
+    lastComment: "The vehicle question was left hanging — that's a potential dealbreaker and it needs a firm answer before advancing.",
+    lastCommentAuthor: "Brandi Adams",
+    lastCommentAuthorInitials: "BA",
+    lastCommentAuthorColor: "#5B5FC7",
+    time: "Thu, 2:45 PM",
+    unread: true,
+    replied: false,
+  },
+  {
+    id: "mi4",
+    interviewId: "7",
+    commentId: "c5",
+    candidateName: "Priya Nair",
+    candidateRole: "Cashier",
+    interviewer: "Bailey Jennings",
+    lastComment: "Great find. Move to offer if PM availability checks out.",
+    lastCommentAuthor: "Brandi Adams",
+    lastCommentAuthorInitials: "BA",
+    lastCommentAuthorColor: "#5B5FC7",
+    time: "Fri, 11:00 AM",
+    unread: false,
+    replied: true,
+  },
+];
+
+// Admin sees replies from managers across all org interviews
+export const ADMIN_INBOX_ITEMS: InboxItem[] = [
+  {
+    id: "ai1",
+    interviewId: "5",
+    commentId: "c4",
+    candidateName: "Marcus Webb",
+    candidateRole: "Shift Lead",
+    interviewer: "Bailey Jennings",
+    lastComment: "Thanks! I almost let the scheduling question slide but circled back. Still didn\u2019t pin down Sunday availability though.",
+    lastCommentAuthor: "Bailey Jennings",
+    lastCommentAuthorInitials: "BJ",
+    lastCommentAuthorColor: "#2A6B3C",
+    time: "Sun, 3:35 PM",
+    unread: false,
+    replied: true,
+  },
+  {
+    id: "ai2",
+    interviewId: "a6",
+    commentId: "c2",
+    candidateName: "Andre Washington",
+    candidateRole: "Shift Lead",
+    interviewer: "Maria Santos",
+    lastComment: "I hear you on the vague answers. I\u2019ll push harder in the follow-up — scheduling one for Thursday.",
+    lastCommentAuthor: "Maria Santos",
+    lastCommentAuthorInitials: "MS",
+    lastCommentAuthorColor: "#D4742C",
+    time: "Mon, 9:15 AM",
+    unread: true,
+    replied: false,
+  },
+  {
+    id: "ai3",
+    interviewId: "a7",
+    commentId: "c2",
+    candidateName: "Tanya Mitchell",
+    candidateRole: "Cashier",
+    interviewer: "Terrence Blake",
+    lastComment: "Agreed she\u2019ll be stronger in person. Setting up an in-store follow-up this week.",
+    lastCommentAuthor: "Terrence Blake",
+    lastCommentAuthorInitials: "TB",
+    lastCommentAuthorColor: "#8B5CF6",
+    time: "Mon, 10:30 AM",
+    unread: true,
+    replied: false,
+  },
+  {
+    id: "ai4",
+    interviewId: "a8",
+    commentId: "c4",
+    candidateName: "Derek Johnson",
+    candidateRole: "Delivery Driver",
+    interviewer: "Ashley Kim",
+    lastComment: "His availability is really tight. I\u2019m not sure it\u2019s worth advancing unless the pipeline is thin.",
+    lastCommentAuthor: "Ashley Kim",
+    lastCommentAuthorInitials: "AK",
+    lastCommentAuthorColor: "#EC4899",
+    time: "Sat, 4:00 PM",
+    unread: false,
+    replied: true,
+  },
+  {
+    id: "ai5",
+    interviewId: "a9",
+    commentId: "c2",
+    candidateName: "Jasmine Torres",
+    candidateRole: "Sandwich Associate",
+    interviewer: "Maria Santos",
+    lastComment: "She\u2019s one of the best I\u2019ve seen for this role. Recommending we fast-track to offer.",
+    lastCommentAuthor: "Maria Santos",
+    lastCommentAuthorInitials: "MS",
+    lastCommentAuthorColor: "#D4742C",
+    time: "Fri, 5:15 PM",
+    unread: true,
+    replied: false,
+  },
+];
+
+export function getBrandInboxItems(brand: Brand, role: Role): InboxItem[] {
+  const items = role === "admin" ? ADMIN_INBOX_ITEMS : MANAGER_INBOX_ITEMS;
+  return applyBrand(items, brand);
+}
