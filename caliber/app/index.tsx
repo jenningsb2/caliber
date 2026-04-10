@@ -4,14 +4,12 @@ import { Image } from "expo-image";
 import { GlassView } from "expo-glass-effect";
 import { Stack, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import potbellyLogo from "../assets/images/Potbelly_Sandwich_Shop_logo.png";
 import tacoBellLogo from "../assets/images/taco_bell_logo.png";
 import {
-  INTERVIEWERS,
   IONICON,
-  LOCATIONS,
   getBrandAdminSections,
   getBrandAdminUpcoming,
   getBrandInboxItems,
@@ -202,12 +200,22 @@ export default function InterviewsScreen() {
   const inboxItems = useMemo(() => getBrandInboxItems(brand, role), [brand, role]);
   const unreadCount = useMemo(() => inboxItems.filter((i) => i.unread).length, [inboxItems]);
 
-  const allRoles = useMemo(
-    () => Array.from(new Set([...upcoming, ...sections.flatMap((s) => s.data)].map((i) => i.role))).sort(),
+  const allInterviews = useMemo(
+    () => [...upcoming, ...sections.flatMap((s) => s.data)],
     [upcoming, sections]
   );
-  const allInterviewers = useMemo(() => INTERVIEWERS[brand === "tacobell" ? "tacobell" : "potbelly"], [brand]);
-  const allLocations = useMemo(() => LOCATIONS[brand === "tacobell" ? "tacobell" : "potbelly"], [brand]);
+  const allRoles = useMemo(
+    () => Array.from(new Set(allInterviews.map((i) => i.role))).sort(),
+    [allInterviews]
+  );
+  const allInterviewers = useMemo(
+    () => Array.from(new Set(allInterviews.map((i) => i.interviewer).filter(Boolean) as string[])).sort(),
+    [allInterviews]
+  );
+  const allLocations = useMemo(
+    () => Array.from(new Set(allInterviews.map((i) => i.location).filter(Boolean) as string[])).sort(),
+    [allInterviews]
+  );
 
   const activeFilterCount = [positionFilter, interviewerFilter, locationFilter].filter(Boolean).length;
 
@@ -347,14 +355,13 @@ export default function InterviewsScreen() {
           <Text style={styles.sheetSectionLabel}>Position</Text>
           <View style={styles.sheetPillRow}>
             {allRoles.map((r) => (
-              <TouchableOpacity
+              <Pressable
                 key={r}
-                activeOpacity={0.7}
                 onPress={() => setPositionFilter(positionFilter === r ? null : r)}
                 style={[styles.sheetPill, positionFilter === r && styles.sheetPillActive]}
               >
                 <Text style={[styles.sheetPillText, positionFilter === r && styles.sheetPillTextActive]}>{r}</Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
 
@@ -364,28 +371,26 @@ export default function InterviewsScreen() {
               <Text style={styles.sheetSectionLabel}>Interviewer</Text>
               <View style={styles.sheetPillRow}>
                 {allInterviewers.map((name) => (
-                  <TouchableOpacity
+                  <Pressable
                     key={name}
-                    activeOpacity={0.7}
                     onPress={() => setInterviewerFilter(interviewerFilter === name ? null : name)}
                     style={[styles.sheetPill, interviewerFilter === name && styles.sheetPillActive]}
                   >
                     <Text style={[styles.sheetPillText, interviewerFilter === name && styles.sheetPillTextActive]}>{name}</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
               </View>
 
               <Text style={styles.sheetSectionLabel}>Location</Text>
               <View style={styles.sheetPillRow}>
                 {allLocations.map((loc) => (
-                  <TouchableOpacity
+                  <Pressable
                     key={loc}
-                    activeOpacity={0.7}
                     onPress={() => setLocationFilter(locationFilter === loc ? null : loc)}
                     style={[styles.sheetPill, locationFilter === loc && styles.sheetPillActive]}
                   >
                     <Text style={[styles.sheetPillText, locationFilter === loc && styles.sheetPillTextActive]}>{loc}</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
               </View>
             </>
@@ -393,8 +398,7 @@ export default function InterviewsScreen() {
 
           {/* Clear all */}
           {activeFilterCount > 0 && (
-            <TouchableOpacity
-              activeOpacity={0.7}
+            <Pressable
               onPress={() => {
                 setPositionFilter(null);
                 setInterviewerFilter(null);
@@ -403,7 +407,7 @@ export default function InterviewsScreen() {
               style={styles.clearFiltersButton}
             >
               <Text style={styles.clearFiltersText}>Clear all filters</Text>
-            </TouchableOpacity>
+            </Pressable>
           )}
         </BottomSheetScrollView>
       </BottomSheet>
